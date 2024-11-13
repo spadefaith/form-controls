@@ -1,5 +1,5 @@
 {
-  "name": "form-controls",
+  "name": "json-form-control",
   "version": "1.0.4",
   "description": "",
   "main": "dist/index.iife.js",
