@@ -1,0 +1,1 @@
+export const FORM_CHANGE_EVENT = 'form-value-change';
