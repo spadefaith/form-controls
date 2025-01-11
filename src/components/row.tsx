@@ -2,8 +2,7 @@ import { h, Fragment } from "preact";
 import { useEffect, useMemo, useRef } from "preact/hooks";
 import { getWindowWidth, selectSize } from "../utils";
 import { useSignal } from "@preact/signals";
-import { pubsub } from "..";
-
+import pubsub from "../utils/pubsub";
 
 
 
@@ -51,7 +50,7 @@ export default function Row(props: {
       if (breaks) {
         hasBreak.value = true;
         applyBreaks(containerRef.current, breaks, windowWidth);
-        pubsub.register(id.value, "def", ({ windowWidth }) => {
+        pubsub().register(id.value, "def", ({ windowWidth }) => {
           applyBreaks(containerRef.current, breaks, windowWidth);
 
         });
@@ -61,7 +60,7 @@ export default function Row(props: {
     }
 
     return () => {
-      pubsub.clean(id.value);
+      pubsub().clean(id.value);
     }
 
   }, []);
