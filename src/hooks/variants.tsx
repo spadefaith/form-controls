@@ -40,7 +40,6 @@ export default function useVariants(config, name, value, text, initialData) {
                 updateData = { ...updateData, ...localData };
             });
 
-
             await Stack(remoteDataConfigs, async ({ url }) => {
                 const replacedUrl = replace(url, currentData);
                 if (!replacedUrl) return
@@ -61,12 +60,8 @@ export default function useVariants(config, name, value, text, initialData) {
                 return accu.concat(item.controls);
             }, []);
 
-
-
             controls.value = restructureControls(selectedControls, data.value);
             data.value = updateData;
-
-            // console.log('data', name, data.value);
 
 
             isLoading.value = false;

@@ -91,7 +91,7 @@ export default function Select(props: {
 
   useTrigger(props?.event?.trigger, name.value, selectedValue.value);
 
-  useCache(props.cache, name.value, selectedValue.value);
+  useCache(props.cache, name.value, selectedValue.value,selectedText.value);
 
   useEffect(() => {
     if (data.value[name.value] == undefined) return;
@@ -123,6 +123,7 @@ export default function Select(props: {
           onChange={changeHandler}
           class="form-select form-control"
           aria-label="Default select example"
+          data-name={name.value}
           {...(props.validator ? { "data-validator": props.validator } : {})}
           {...(props.readonly ? { disabled: true } : {})}
         >

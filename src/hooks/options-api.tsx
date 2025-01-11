@@ -25,10 +25,9 @@ export default function useRemoteOptions(config, selectedValue, name, isChanged)
 
         name && (data.name = name);
 
-
         if (cache) {
             cache.forEach(c => {
-                !isFalsy(caches.get(c)) && (data[c] = caches.get(c));
+                !isFalsy(caches.get(c)) && (data[c] = caches.get(c).get("value"));
             })
         };
 

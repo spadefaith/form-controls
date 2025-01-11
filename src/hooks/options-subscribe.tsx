@@ -29,7 +29,7 @@ export default function useSubscribeOptions(config, name) {
 
                     if (cache) {
                         cache.forEach(c => {
-                            !isFalsy(caches.get(c)) && (data[c] = caches.get(c));
+                            !isFalsy(caches.get(c)) && (data[c] = caches.get(c).get("value"));
                         })
                     };
 

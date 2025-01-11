@@ -1,7 +1,9 @@
 import RecursiveIterator from "recursive-iterator";
+import caches from "./caches";
+import singleton from "./singleton";
 
-let index = 0;
 export const generateIndex = () => {
+  let index = singleton<number>("_index",0);
   return index++;
 };
 
@@ -47,8 +49,6 @@ export const cloneObj = (ctx) => {
 
   return ctx;
 };
-
-
 
 export const parseUpdateData = (ctx) => {
   if (!ctx) {
@@ -230,7 +230,6 @@ export function getFormData<T>(
 export const generateUniqueId = () => crypto.randomUUID();
 
 export const createOptions = (arr, selectedValue) => {
-
   return cloneObj(arr).map((item) => {
     if (selectedValue && item.value == selectedValue) {
       item.selected = true;
@@ -281,64 +280,6 @@ export const selectSize = (dic, size) => {
   return v;
 };
 
-export class PubSub {
-  callbacks: object;
-  constructor() {
-    this.callbacks = {}
-  }
-  /**
-   * 
-   * @param key - ensures that the subscriber has a unique handler for the event 
-   * @param event - subscriber event
-   * @param handler - subscriber handler to event 
-   */
-  register(key, event: string, handler: (a: any) => void) {
-    if (!this.callbacks[key]) {
-      this.callbacks[key] = {};
-    }
-    this.callbacks[key][event] = handler;
-  }
-  /**
-   * @param event - event to broadcast
-   * @param payload - data to broadcast
-   */
-  broadcast(event, payload) {
-    //it compiles all handlers in a event;
-    const callbacks = Object.keys(this.callbacks).reduce((accu, key) => {
-      const config = this.callbacks[key];
-      if (config[event]) {
-        accu.push(config[event]);
-      }
-      return accu;
-    }, []);
-
-    if (callbacks && callbacks.length) {
-      callbacks.forEach(callback => {
-        callback(payload);
-      })
-    }
-  }
-
-  clean(id) {
-    delete this.callbacks[id];
-  }
-}
-
-export const InstanceCount = class {
-  _count: number;
-  constructor() {
-    this._count = 0;
-  }
-  get count() {
-    return this._count;
-  }
-  increment() {
-    this._count += 1;
-  }
-  decrement() {
-    this._count -= 1;
-  }
-}
 
 const toBool = (test, a, b) => {
   switch (test) {
@@ -392,7 +333,6 @@ const toBool = (test, a, b) => {
   }
 }
 
-
 export const getVariant = (variants, payload) => {
   if (!variants || !variants.length) return;
 
@@ -421,16 +361,35 @@ export const getVariant = (variants, payload) => {
       t = test;
     } else if (typeof test == 'object') {
 
-      t = Object.keys(test).every((key) => {
-        return testCtx(test[key], payload[key]);
-      })
+      const testItem = (test)=>Object.keys(test).every((key) => {
+        if(key.includes("caches.")){
+          //"caches.business_unit_id.value"
+          //"caches.business_unit_id.name"
+          //"caches.business_unit_id.text"
+          const [a,b,c] = key.split(".");
+          const parent = caches().get(b);
+          
+          if(!parent){
+            return false;
+          }
+          return testCtx(test[key], parent.get(c));
+        } else {
+          return testCtx(test[key], payload[key]);
+        }
+      });
+
+      if(Array.isArray(test)){
+        t = test.every(item=>testItem(item));
+      } else {
+        t = testItem(test);
+      }
     }
+
     return t;
   });
 
   return variant;
 }
-
 
 export const replace = (str, obj) => {
   str = decodeURIComponent(str);
@@ -476,25 +435,6 @@ export const reviveData = (data) => {
   }
 }
 
-export class CacheData {
-  cache: Map<string, any>;
-  constructor() {
-    this.cache = new Map;
-  }
-  set(key, value) {
-    this.cache.set(key, value);
-  }
-  get(key) {
-    return this.cache.get(key);
-  }
-  delete(key) {
-    this.cache.delete(key);
-  }
-  clear() {
-    this.cache.clear();
-  }
-}
-
 export function Stack(array, callback) {
   const l = array.length;
   let index = 0;
@@ -525,3 +465,4 @@ export function Stack(array, callback) {
     }
   });
 }
+

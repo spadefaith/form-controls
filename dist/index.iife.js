@@ -1466,9 +1466,23 @@
       if (typeof test == "boolean") {
         t4 = test;
       } else if (typeof test == "object") {
-        t4 = Object.keys(test).every((key) => {
-          return testCtx(test[key], payload[key]);
+        const testItem = (test2) => Object.keys(test2).every((key) => {
+          if (key.includes("caches.")) {
+            const [a5, b3, c5] = key.split(".");
+            const parent = caches.get(b3);
+            if (!parent) {
+              return false;
+            }
+            return testCtx(test2[key], parent.get(c5));
+          } else {
+            return testCtx(test2[key], payload[key]);
+          }
         });
+        if (Array.isArray(test)) {
+          t4 = test.every((item2) => testItem(item2));
+        } else {
+          t4 = testItem(test);
+        }
       }
       return t4;
     });
@@ -1649,7 +1663,7 @@
       name && (data.name = name);
       if (cache) {
         cache.forEach((c5) => {
-          !isFalsy(caches.get(c5)) && (data[c5] = caches.get(c5));
+          !isFalsy(caches.get(c5)) && (data[c5] = caches.get(c5).get("value"));
         });
       }
       ;
@@ -1761,7 +1775,7 @@
             };
             if (cache) {
               cache.forEach((c5) => {
-                !isFalsy(caches.get(c5)) && (data2[c5] = caches.get(c5));
+                !isFalsy(caches.get(c5)) && (data2[c5] = caches.get(c5).get("value"));
               });
             }
             ;
@@ -1828,14 +1842,18 @@
   }
 
   // src/hooks/cache.tsx
-  function useCache(cache, name, value) {
+  function useCache(cache, name, value, text) {
     y2(() => {
       if (isFalsy(cache)) return;
-      caches.set(name, value);
+      const data = /* @__PURE__ */ new Map();
+      data.set("name", name);
+      data.set("value", value);
+      data.set("text", text);
+      caches.set(name, data);
       return () => {
         caches.delete(name);
       };
-    }, [cache, name, value]);
+    }, [cache, name, value, text]);
   }
 
   // src/components/select.tsx
@@ -1877,7 +1895,7 @@
       variants.value = variantControls.value;
     }, [variantControls.value, variantData.value]);
     useTrigger(props?.event?.trigger, name.value, selectedValue.value);
-    useCache(props.cache, name.value, selectedValue.value);
+    useCache(props.cache, name.value, selectedValue.value, selectedText.value);
     y2(() => {
       if (data.value[name.value] == void 0) return;
       selectedValue.value = data.value[name.value];

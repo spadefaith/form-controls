@@ -32,6 +32,7 @@ const Input = (props: {
         </label>
       )}
       <input
+        data-name={name.value}
         data-tag={props.tag}
         onInput={onInput}
         value={value.value}
@@ -39,7 +40,7 @@ const Input = (props: {
         type={props.type}
         placeholder={props.placeholder || ""}
         id={name.value}
-        {...(isView.value ? { 'data-name': name.value } : { name: name.value })}
+        {...(isView.value ? { } : { name: name.value })}
         {...(props.readonly || isView.value ? { readonly: true } : {})}
         {...(props.disabled ? { disabled: true } : {})}
         {...(props.validator ? { "data-validator": props.validator } : {})}
