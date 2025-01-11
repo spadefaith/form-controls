@@ -1,6 +1,6 @@
 {
   "name": "json-form-control",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -20,9 +20,7 @@
     "preact": "^10.23.2",
     "preact-custom-element": "^4.3.0",
     "recursive-iterator": "^3.3.0",
-    "string-template": "^1.0.0",
-    "vanjs-core": "^1.5.2",
-    "vanjs-element": "^2.0.0"
+    "string-template": "^1.0.0"
   },
   "devDependencies": {
     "typescript": "^5.5.4"

@@ -29,12 +29,6 @@ importers:
       string-template:
         specifier: ^1.0.0
         version: 1.0.0
-      vanjs-core:
-        specifier: ^1.5.2
-        version: 1.5.2
-      vanjs-element:
-        specifier: ^2.0.0
-        version: 2.0.0
     devDependencies:
       typescript:
         specifier: ^5.5.4
@@ -222,12 +216,6 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  vanjs-core@1.5.2:
-    resolution: {integrity: sha512-z9MHAzxYbNFJ6MYP+4j9l9KMxDU3ryI65JjIfUbGQwF1paLfiuqtIiq9Ve1UGKLd774Z7mtdWzd+/FR785dKjQ==}
-
-  vanjs-element@2.0.0:
-    resolution: {integrity: sha512-hUP2fFo4xEaDUdUeu2lJ0f1g6M/fa59iw+yrVDSejs5GkBXIM8iZlwcdOoSkChrzuoZ8KX4CM/Ap0QpD9yV9yw==}
-
 snapshots:
 
   '@esbuild/aix-ppc64@0.23.1':
@@ -351,9 +339,3 @@ snapshots:
   string-template@1.0.0: {}
 
   typescript@5.6.3: {}
-
-  vanjs-core@1.5.2: {}
-
-  vanjs-element@2.0.0:
-    dependencies:
-      vanjs-core: 1.5.2
