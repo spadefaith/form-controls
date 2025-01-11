@@ -1,12 +1,7 @@
 
-import { CacheData, InstanceCount, PubSub } from "./utils";
+
 import registerCustomElement from "./object/register-custom";
+import walker from "./utils/walker";
 
 
-
-export const pubsub = new PubSub();
-export const instanceCount = new InstanceCount();
-export const caches = new CacheData();
-
-
-export {registerCustomElement};
+export {registerCustomElement, walker};

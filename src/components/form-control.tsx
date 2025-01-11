@@ -11,12 +11,12 @@ import Repeatable from "./repeatable";
 import InputCheck from "./input-check";
 import FormGroup from "./form-group";
 import { useEffect } from "preact/hooks";
-import { instanceCount } from "..";
 import Row from "./row";
 import Col from "./col";
 import useData from "../hooks/data";
 import useControls from "../hooks/controls";
-import useValue from "../hooks/value";
+import instanceCount from "../utils/instance";
+import caches from "../utils/caches";
 
 export default function FormControl(props: {
   controls?: FormControlItemType[];
@@ -29,12 +29,14 @@ export default function FormControl(props: {
   const { data } = useData(props.data);
   const { controls } = useControls(props.controls, data.value);
 
+
   useEffect(() => {
-    instanceCount.increment();
+    instanceCount().increment();
     return () => {
-      if (instanceCount.count > 0) {
-        instanceCount.decrement();
+      if (instanceCount().count > 0) {
+        instanceCount().decrement();
       }
+      caches().clear();
     }
   }, [])
 

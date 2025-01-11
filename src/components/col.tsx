@@ -2,7 +2,7 @@ import { h, Fragment } from "preact";
 import { useEffect, useMemo, useRef } from "preact/hooks";
 import { getWindowWidth, selectSize } from "../utils";
 import { useSignal } from "@preact/signals";
-import { pubsub } from "..";
+import pubsub from "../utils/pubsub";
 
 
 
@@ -48,7 +48,7 @@ export default function Col(props: {
 
       if (width) {
         applyWidth(containerRef.current, width, windowWidth);
-        pubsub.register(id.value, "def", ({ windowWidth }) => {
+        pubsub().register(id.value, "def", ({ windowWidth }) => {
           applyWidth(containerRef.current, width, windowWidth);
         });
       }
@@ -58,7 +58,7 @@ export default function Col(props: {
     }
 
     return () => {
-      pubsub.clean(id.value);
+      pubsub().clean(id.value);
     }
 
   }, []);

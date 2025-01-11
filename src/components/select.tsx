@@ -7,7 +7,7 @@ import useRemoteOptions from "../hooks/options-api";
 import useLocalOptions from "../hooks/options";
 import useVariants from "../hooks/variants";
 import useData from "../hooks/data";
-import useSubscribeOptions from "../hooks/options-subscribe";
+import useSubscribeOptions from "../hooks/subscribe";
 import useTrigger from "../hooks/trigger";
 import Visible from "./visibile";
 import ControlLoader from "./control-loader";
@@ -94,8 +94,11 @@ export default function Select(props: {
   useCache(props.cache, name.value, selectedValue.value,selectedText.value);
 
   useEffect(() => {
-    if (data.value[name.value] == undefined) return;
-    selectedValue.value = data.value[name.value];
+    if (data.value[name.value] == undefined){
+      selectedValue.value = null;
+    } else {
+      selectedValue.value = data.value[name.value];
+    }
   }, [data.value, name.value]);
 
   const changeHandler = async (e) => {

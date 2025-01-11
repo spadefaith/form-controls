@@ -10,7 +10,7 @@ import useRemoteOptions from "../hooks/options-api";
 import useLocalOptions from "../hooks/options";
 import useVariants from "../hooks/variants";
 import useData from "../hooks/data";
-import useSubscribeOptions from "../hooks/options-subscribe";
+import useSubscribe from "../hooks/subscribe";
 import useTrigger from "../hooks/trigger";
 import Visible from "./visibile";
 import ControlLoader from "./control-loader";
@@ -49,7 +49,7 @@ export default function DataList(props: {
   const { data } = useData(props.data);
   const { options: remoteOptions, isLoading: isRemoteOptionsLoading } = useRemoteOptions(props.option_api, value.value, name.value, isChanged.value);
   const { options: localOptions } = useLocalOptions(props.options, value.value, isChanged.value);
-  const { options: subscribeOptions, isLoading: isSubscribeOptionsLoading } = useSubscribeOptions(props?.event?.subscribe, name.value);
+  const { options: subscribeOptions, isLoading: isSubscribeOptionsLoading, value:macroValue } = useSubscribe(props?.event?.subscribe, name.value);
   const { controls: variantControls, data: variantData, isLoading: isVariantLoading } = useVariants(props.variants, name.value, value.value, value.value, props.data);
 
   useMemo(() => {

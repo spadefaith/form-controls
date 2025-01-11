@@ -1,8 +1,7 @@
 import { h } from "preact";
 import { FormControlItemType } from "../../types";
 import FormControl from "./form-control";
-import { useEffect, useMemo } from "preact/hooks";
-import { loopItem } from "../utils";
+import { useMemo } from "preact/hooks";
 
 const controlInputKey: FormControlItemType = {
   id: 1,
