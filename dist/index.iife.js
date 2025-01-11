@@ -1,12 +1,19 @@
-(() => {
+var JsonFormControl = (() => {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __getProtoOf = Object.getPrototypeOf;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
-  var __commonJS = (cb, mod) => function __require() {
-    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
+    get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
+  }) : x)(function(x) {
+    if (typeof require !== "undefined") return require.apply(this, arguments);
+    throw Error('Dynamic require of "' + x + '" is not supported');
+  });
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
   };
   var __copyProps = (to, from, except, desc) => {
     if (from && typeof from === "object" || typeof from === "function") {
@@ -24,1124 +31,80 @@
     isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
     mod
   ));
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-  // node_modules/.pnpm/recursive-iterator@3.3.0/node_modules/recursive-iterator/src/lang.js
-  var require_lang = __commonJS({
-    "node_modules/.pnpm/recursive-iterator@3.3.0/node_modules/recursive-iterator/src/lang.js"(exports) {
-      "use strict";
-      function isObject(any) {
-        return any !== null && typeof any === "object";
-      }
-      var { isArray } = Array;
-      function isArrayLike(any) {
-        if (!isObject(any)) return false;
-        if (!("length" in any)) return false;
-        const length = any.length;
-        if (!isNumber(length)) return false;
-        if (length > 0) {
-          return length - 1 in any;
-        } else {
-          for (const key in any) {
-            return false;
-          }
-        }
-      }
-      function isNumber(any) {
-        return typeof any === "number";
-      }
-      function getKeys(object) {
-        const keys_ = Object.keys(object);
-        if (isArray(object)) {
-        } else if (isArrayLike(object)) {
-          const index2 = keys_.indexOf("length");
-          if (index2 > -1) {
-            keys_.splice(index2, 1);
-          }
-        } else {
-          keys_.sort();
-        }
-        return keys_;
-      }
-      exports.getKeys = getKeys;
-      exports.isArray = isArray;
-      exports.isArrayLike = isArrayLike;
-      exports.isObject = isObject;
-      exports.isNumber = isNumber;
-    }
+  // src/index.ts
+  var src_exports = {};
+  __export(src_exports, {
+    registerCustomElement: () => registerCustomElement,
+    walker: () => walker
   });
 
-  // node_modules/.pnpm/recursive-iterator@3.3.0/node_modules/recursive-iterator/src/RecursiveIterator.js
-  var require_RecursiveIterator = __commonJS({
-    "node_modules/.pnpm/recursive-iterator@3.3.0/node_modules/recursive-iterator/src/RecursiveIterator.js"(exports, module) {
-      "use strict";
-      var { isObject, getKeys } = require_lang();
-      var BYPASS_MODE = "__bypassMode";
-      var IGNORE_CIRCULAR = "__ignoreCircular";
-      var MAX_DEEP = "__maxDeep";
-      var CACHE = "__cache";
-      var QUEUE = "__queue";
-      var STATE = "__state";
-      var EMPTY_STATE = {};
-      var RecursiveIterator2 = class {
-        /**
-         * @param {Object|Array} root
-         * @param {Number} [bypassMode=0]
-         * @param {Boolean} [ignoreCircular=false]
-         * @param {Number} [maxDeep=100]
-         */
-        constructor(root, bypassMode = 0, ignoreCircular = false, maxDeep = 100) {
-          this[BYPASS_MODE] = bypassMode;
-          this[IGNORE_CIRCULAR] = ignoreCircular;
-          this[MAX_DEEP] = maxDeep;
-          this[CACHE] = [];
-          this[QUEUE] = [];
-          this[STATE] = this.getState(void 0, root);
-        }
-        /**
-         * @returns {Object}
-         */
-        next() {
-          const { node, path, deep } = this[STATE] || EMPTY_STATE;
-          if (this[MAX_DEEP] > deep) {
-            if (this.isNode(node)) {
-              if (this.isCircular(node)) {
-                if (this[IGNORE_CIRCULAR]) {
-                } else {
-                  throw new Error("Circular reference");
-                }
-              } else {
-                if (this.onStepInto(this[STATE])) {
-                  const descriptors = this.getStatesOfChildNodes(node, path, deep);
-                  const method = this[BYPASS_MODE] ? "push" : "unshift";
-                  this[QUEUE][method](...descriptors);
-                  this[CACHE].push(node);
-                }
-              }
-            }
-          }
-          const value = this[QUEUE].shift();
-          const done = !value;
-          this[STATE] = value;
-          if (done) this.destroy();
-          return { value, done };
-        }
-        /**
-         *
-         */
-        destroy() {
-          this[QUEUE].length = 0;
-          this[CACHE].length = 0;
-          this[STATE] = null;
-        }
-        /**
-         * @param {*} any
-         * @returns {Boolean}
-         */
-        isNode(any) {
-          return isObject(any);
-        }
-        /**
-         * @param {*} any
-         * @returns {Boolean}
-         */
-        isLeaf(any) {
-          return !this.isNode(any);
-        }
-        /**
-         * @param {*} any
-         * @returns {Boolean}
-         */
-        isCircular(any) {
-          return this[CACHE].indexOf(any) !== -1;
-        }
-        /**
-         * Returns states of child nodes
-         * @param {Object} node
-         * @param {Array} path
-         * @param {Number} deep
-         * @returns {Array<Object>}
-         */
-        getStatesOfChildNodes(node, path, deep) {
-          return getKeys(node).map(
-            (key) => this.getState(node, node[key], key, path.concat(key), deep + 1)
-          );
-        }
-        /**
-         * Returns state of node. Calls for each node
-         * @param {Object} [parent]
-         * @param {*} [node]
-         * @param {String} [key]
-         * @param {Array} [path]
-         * @param {Number} [deep]
-         * @returns {Object}
-         */
-        getState(parent, node, key, path = [], deep = 0) {
-          return { parent, node, key, path, deep };
-        }
-        /**
-         * Callback
-         * @param {Object} state
-         * @returns {Boolean}
-         */
-        onStepInto(state) {
-          return true;
-        }
-        /**
-         * @returns {RecursiveIterator}
-         */
-        [Symbol.iterator]() {
-          return this;
-        }
-      };
-      module.exports = RecursiveIterator2;
-    }
-  });
+  // src/object/register-custom.ts
+  var import_preact_custom_element = __toESM(__require("preact-custom-element"), 1);
 
-  // node_modules/.pnpm/preact@10.24.3/node_modules/preact/dist/preact.module.js
-  var n;
-  var l;
-  var u;
-  var t;
-  var i;
-  var o;
-  var r;
-  var f;
-  var e;
-  var c;
-  var s;
-  var a;
-  var h = {};
-  var v = [];
-  var p = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;
-  var y = Array.isArray;
-  function d(n3, l6) {
-    for (var u5 in l6) n3[u5] = l6[u5];
-    return n3;
-  }
-  function w(n3) {
-    n3 && n3.parentNode && n3.parentNode.removeChild(n3);
-  }
-  function _(l6, u5, t4) {
-    var i5, o4, r5, f4 = {};
-    for (r5 in u5) "key" == r5 ? i5 = u5[r5] : "ref" == r5 ? o4 = u5[r5] : f4[r5] = u5[r5];
-    if (arguments.length > 2 && (f4.children = arguments.length > 3 ? n.call(arguments, 2) : t4), "function" == typeof l6 && null != l6.defaultProps) for (r5 in l6.defaultProps) void 0 === f4[r5] && (f4[r5] = l6.defaultProps[r5]);
-    return g(l6, f4, i5, o4, null);
-  }
-  function g(n3, t4, i5, o4, r5) {
-    var f4 = { type: n3, props: t4, key: i5, ref: o4, __k: null, __: null, __b: 0, __e: null, __d: void 0, __c: null, constructor: void 0, __v: null == r5 ? ++u : r5, __i: -1, __u: 0 };
-    return null == r5 && null != l.vnode && l.vnode(f4), f4;
-  }
-  function b(n3) {
-    return n3.children;
-  }
-  function k(n3, l6) {
-    this.props = n3, this.context = l6;
-  }
-  function x(n3, l6) {
-    if (null == l6) return n3.__ ? x(n3.__, n3.__i + 1) : null;
-    for (var u5; l6 < n3.__k.length; l6++) if (null != (u5 = n3.__k[l6]) && null != u5.__e) return u5.__e;
-    return "function" == typeof n3.type ? x(n3) : null;
-  }
-  function C(n3) {
-    var l6, u5;
-    if (null != (n3 = n3.__) && null != n3.__c) {
-      for (n3.__e = n3.__c.base = null, l6 = 0; l6 < n3.__k.length; l6++) if (null != (u5 = n3.__k[l6]) && null != u5.__e) {
-        n3.__e = n3.__c.base = u5.__e;
-        break;
-      }
-      return C(n3);
-    }
-  }
-  function S(n3) {
-    (!n3.__d && (n3.__d = true) && i.push(n3) && !M.__r++ || o !== l.debounceRendering) && ((o = l.debounceRendering) || r)(M);
-  }
-  function M() {
-    var n3, u5, t4, o4, r5, e4, c5, s6;
-    for (i.sort(f); n3 = i.shift(); ) n3.__d && (u5 = i.length, o4 = void 0, e4 = (r5 = (t4 = n3).__v).__e, c5 = [], s6 = [], t4.__P && ((o4 = d({}, r5)).__v = r5.__v + 1, l.vnode && l.vnode(o4), O(t4.__P, o4, r5, t4.__n, t4.__P.namespaceURI, 32 & r5.__u ? [e4] : null, c5, null == e4 ? x(r5) : e4, !!(32 & r5.__u), s6), o4.__v = r5.__v, o4.__.__k[o4.__i] = o4, j(c5, o4, s6), o4.__e != e4 && C(o4)), i.length > u5 && i.sort(f));
-    M.__r = 0;
-  }
-  function P(n3, l6, u5, t4, i5, o4, r5, f4, e4, c5, s6) {
-    var a5, p5, y4, d5, w4, _4 = t4 && t4.__k || v, g3 = l6.length;
-    for (u5.__d = e4, $(u5, l6, _4), e4 = u5.__d, a5 = 0; a5 < g3; a5++) null != (y4 = u5.__k[a5]) && (p5 = -1 === y4.__i ? h : _4[y4.__i] || h, y4.__i = a5, O(n3, y4, p5, i5, o4, r5, f4, e4, c5, s6), d5 = y4.__e, y4.ref && p5.ref != y4.ref && (p5.ref && N(p5.ref, null, y4), s6.push(y4.ref, y4.__c || d5, y4)), null == w4 && null != d5 && (w4 = d5), 65536 & y4.__u || p5.__k === y4.__k ? e4 = I(y4, e4, n3) : "function" == typeof y4.type && void 0 !== y4.__d ? e4 = y4.__d : d5 && (e4 = d5.nextSibling), y4.__d = void 0, y4.__u &= -196609);
-    u5.__d = e4, u5.__e = w4;
-  }
-  function $(n3, l6, u5) {
-    var t4, i5, o4, r5, f4, e4 = l6.length, c5 = u5.length, s6 = c5, a5 = 0;
-    for (n3.__k = [], t4 = 0; t4 < e4; t4++) null != (i5 = l6[t4]) && "boolean" != typeof i5 && "function" != typeof i5 ? (r5 = t4 + a5, (i5 = n3.__k[t4] = "string" == typeof i5 || "number" == typeof i5 || "bigint" == typeof i5 || i5.constructor == String ? g(null, i5, null, null, null) : y(i5) ? g(b, { children: i5 }, null, null, null) : void 0 === i5.constructor && i5.__b > 0 ? g(i5.type, i5.props, i5.key, i5.ref ? i5.ref : null, i5.__v) : i5).__ = n3, i5.__b = n3.__b + 1, o4 = null, -1 !== (f4 = i5.__i = L(i5, u5, r5, s6)) && (s6--, (o4 = u5[f4]) && (o4.__u |= 131072)), null == o4 || null === o4.__v ? (-1 == f4 && a5--, "function" != typeof i5.type && (i5.__u |= 65536)) : f4 !== r5 && (f4 == r5 - 1 ? a5-- : f4 == r5 + 1 ? a5++ : (f4 > r5 ? a5-- : a5++, i5.__u |= 65536))) : i5 = n3.__k[t4] = null;
-    if (s6) for (t4 = 0; t4 < c5; t4++) null != (o4 = u5[t4]) && 0 == (131072 & o4.__u) && (o4.__e == n3.__d && (n3.__d = x(o4)), V(o4, o4));
-  }
-  function I(n3, l6, u5) {
-    var t4, i5;
-    if ("function" == typeof n3.type) {
-      for (t4 = n3.__k, i5 = 0; t4 && i5 < t4.length; i5++) t4[i5] && (t4[i5].__ = n3, l6 = I(t4[i5], l6, u5));
-      return l6;
-    }
-    n3.__e != l6 && (l6 && n3.type && !u5.contains(l6) && (l6 = x(n3)), u5.insertBefore(n3.__e, l6 || null), l6 = n3.__e);
-    do {
-      l6 = l6 && l6.nextSibling;
-    } while (null != l6 && 8 === l6.nodeType);
-    return l6;
-  }
-  function L(n3, l6, u5, t4) {
-    var i5 = n3.key, o4 = n3.type, r5 = u5 - 1, f4 = u5 + 1, e4 = l6[u5];
-    if (null === e4 || e4 && i5 == e4.key && o4 === e4.type && 0 == (131072 & e4.__u)) return u5;
-    if (t4 > (null != e4 && 0 == (131072 & e4.__u) ? 1 : 0)) for (; r5 >= 0 || f4 < l6.length; ) {
-      if (r5 >= 0) {
-        if ((e4 = l6[r5]) && 0 == (131072 & e4.__u) && i5 == e4.key && o4 === e4.type) return r5;
-        r5--;
-      }
-      if (f4 < l6.length) {
-        if ((e4 = l6[f4]) && 0 == (131072 & e4.__u) && i5 == e4.key && o4 === e4.type) return f4;
-        f4++;
-      }
-    }
-    return -1;
-  }
-  function T(n3, l6, u5) {
-    "-" === l6[0] ? n3.setProperty(l6, null == u5 ? "" : u5) : n3[l6] = null == u5 ? "" : "number" != typeof u5 || p.test(l6) ? u5 : u5 + "px";
-  }
-  function A(n3, l6, u5, t4, i5) {
-    var o4;
-    n: if ("style" === l6) if ("string" == typeof u5) n3.style.cssText = u5;
-    else {
-      if ("string" == typeof t4 && (n3.style.cssText = t4 = ""), t4) for (l6 in t4) u5 && l6 in u5 || T(n3.style, l6, "");
-      if (u5) for (l6 in u5) t4 && u5[l6] === t4[l6] || T(n3.style, l6, u5[l6]);
-    }
-    else if ("o" === l6[0] && "n" === l6[1]) o4 = l6 !== (l6 = l6.replace(/(PointerCapture)$|Capture$/i, "$1")), l6 = l6.toLowerCase() in n3 || "onFocusOut" === l6 || "onFocusIn" === l6 ? l6.toLowerCase().slice(2) : l6.slice(2), n3.l || (n3.l = {}), n3.l[l6 + o4] = u5, u5 ? t4 ? u5.u = t4.u : (u5.u = e, n3.addEventListener(l6, o4 ? s : c, o4)) : n3.removeEventListener(l6, o4 ? s : c, o4);
-    else {
-      if ("http://www.w3.org/2000/svg" == i5) l6 = l6.replace(/xlink(H|:h)/, "h").replace(/sName$/, "s");
-      else if ("width" != l6 && "height" != l6 && "href" != l6 && "list" != l6 && "form" != l6 && "tabIndex" != l6 && "download" != l6 && "rowSpan" != l6 && "colSpan" != l6 && "role" != l6 && "popover" != l6 && l6 in n3) try {
-        n3[l6] = null == u5 ? "" : u5;
-        break n;
-      } catch (n4) {
-      }
-      "function" == typeof u5 || (null == u5 || false === u5 && "-" !== l6[4] ? n3.removeAttribute(l6) : n3.setAttribute(l6, "popover" == l6 && 1 == u5 ? "" : u5));
-    }
-  }
-  function F(n3) {
-    return function(u5) {
-      if (this.l) {
-        var t4 = this.l[u5.type + n3];
-        if (null == u5.t) u5.t = e++;
-        else if (u5.t < t4.u) return;
-        return t4(l.event ? l.event(u5) : u5);
-      }
-    };
-  }
-  function O(n3, u5, t4, i5, o4, r5, f4, e4, c5, s6) {
-    var a5, h3, v5, p5, w4, _4, g3, m2, x2, C3, S2, M2, $2, I2, H, L2, T3 = u5.type;
-    if (void 0 !== u5.constructor) return null;
-    128 & t4.__u && (c5 = !!(32 & t4.__u), r5 = [e4 = u5.__e = t4.__e]), (a5 = l.__b) && a5(u5);
-    n: if ("function" == typeof T3) try {
-      if (m2 = u5.props, x2 = "prototype" in T3 && T3.prototype.render, C3 = (a5 = T3.contextType) && i5[a5.__c], S2 = a5 ? C3 ? C3.props.value : a5.__ : i5, t4.__c ? g3 = (h3 = u5.__c = t4.__c).__ = h3.__E : (x2 ? u5.__c = h3 = new T3(m2, S2) : (u5.__c = h3 = new k(m2, S2), h3.constructor = T3, h3.render = q), C3 && C3.sub(h3), h3.props = m2, h3.state || (h3.state = {}), h3.context = S2, h3.__n = i5, v5 = h3.__d = true, h3.__h = [], h3._sb = []), x2 && null == h3.__s && (h3.__s = h3.state), x2 && null != T3.getDerivedStateFromProps && (h3.__s == h3.state && (h3.__s = d({}, h3.__s)), d(h3.__s, T3.getDerivedStateFromProps(m2, h3.__s))), p5 = h3.props, w4 = h3.state, h3.__v = u5, v5) x2 && null == T3.getDerivedStateFromProps && null != h3.componentWillMount && h3.componentWillMount(), x2 && null != h3.componentDidMount && h3.__h.push(h3.componentDidMount);
-      else {
-        if (x2 && null == T3.getDerivedStateFromProps && m2 !== p5 && null != h3.componentWillReceiveProps && h3.componentWillReceiveProps(m2, S2), !h3.__e && (null != h3.shouldComponentUpdate && false === h3.shouldComponentUpdate(m2, h3.__s, S2) || u5.__v === t4.__v)) {
-          for (u5.__v !== t4.__v && (h3.props = m2, h3.state = h3.__s, h3.__d = false), u5.__e = t4.__e, u5.__k = t4.__k, u5.__k.some(function(n4) {
-            n4 && (n4.__ = u5);
-          }), M2 = 0; M2 < h3._sb.length; M2++) h3.__h.push(h3._sb[M2]);
-          h3._sb = [], h3.__h.length && f4.push(h3);
-          break n;
-        }
-        null != h3.componentWillUpdate && h3.componentWillUpdate(m2, h3.__s, S2), x2 && null != h3.componentDidUpdate && h3.__h.push(function() {
-          h3.componentDidUpdate(p5, w4, _4);
-        });
-      }
-      if (h3.context = S2, h3.props = m2, h3.__P = n3, h3.__e = false, $2 = l.__r, I2 = 0, x2) {
-        for (h3.state = h3.__s, h3.__d = false, $2 && $2(u5), a5 = h3.render(h3.props, h3.state, h3.context), H = 0; H < h3._sb.length; H++) h3.__h.push(h3._sb[H]);
-        h3._sb = [];
-      } else do {
-        h3.__d = false, $2 && $2(u5), a5 = h3.render(h3.props, h3.state, h3.context), h3.state = h3.__s;
-      } while (h3.__d && ++I2 < 25);
-      h3.state = h3.__s, null != h3.getChildContext && (i5 = d(d({}, i5), h3.getChildContext())), x2 && !v5 && null != h3.getSnapshotBeforeUpdate && (_4 = h3.getSnapshotBeforeUpdate(p5, w4)), P(n3, y(L2 = null != a5 && a5.type === b && null == a5.key ? a5.props.children : a5) ? L2 : [L2], u5, t4, i5, o4, r5, f4, e4, c5, s6), h3.base = u5.__e, u5.__u &= -161, h3.__h.length && f4.push(h3), g3 && (h3.__E = h3.__ = null);
-    } catch (n4) {
-      if (u5.__v = null, c5 || null != r5) {
-        for (u5.__u |= c5 ? 160 : 128; e4 && 8 === e4.nodeType && e4.nextSibling; ) e4 = e4.nextSibling;
-        r5[r5.indexOf(e4)] = null, u5.__e = e4;
-      } else u5.__e = t4.__e, u5.__k = t4.__k;
-      l.__e(n4, u5, t4);
-    }
-    else null == r5 && u5.__v === t4.__v ? (u5.__k = t4.__k, u5.__e = t4.__e) : u5.__e = z(t4.__e, u5, t4, i5, o4, r5, f4, c5, s6);
-    (a5 = l.diffed) && a5(u5);
-  }
-  function j(n3, u5, t4) {
-    u5.__d = void 0;
-    for (var i5 = 0; i5 < t4.length; i5++) N(t4[i5], t4[++i5], t4[++i5]);
-    l.__c && l.__c(u5, n3), n3.some(function(u6) {
-      try {
-        n3 = u6.__h, u6.__h = [], n3.some(function(n4) {
-          n4.call(u6);
-        });
-      } catch (n4) {
-        l.__e(n4, u6.__v);
-      }
-    });
-  }
-  function z(u5, t4, i5, o4, r5, f4, e4, c5, s6) {
-    var a5, v5, p5, d5, _4, g3, m2, b3 = i5.props, k3 = t4.props, C3 = t4.type;
-    if ("svg" === C3 ? r5 = "http://www.w3.org/2000/svg" : "math" === C3 ? r5 = "http://www.w3.org/1998/Math/MathML" : r5 || (r5 = "http://www.w3.org/1999/xhtml"), null != f4) {
-      for (a5 = 0; a5 < f4.length; a5++) if ((_4 = f4[a5]) && "setAttribute" in _4 == !!C3 && (C3 ? _4.localName === C3 : 3 === _4.nodeType)) {
-        u5 = _4, f4[a5] = null;
-        break;
-      }
-    }
-    if (null == u5) {
-      if (null === C3) return document.createTextNode(k3);
-      u5 = document.createElementNS(r5, C3, k3.is && k3), c5 && (l.__m && l.__m(t4, f4), c5 = false), f4 = null;
-    }
-    if (null === C3) b3 === k3 || c5 && u5.data === k3 || (u5.data = k3);
-    else {
-      if (f4 = f4 && n.call(u5.childNodes), b3 = i5.props || h, !c5 && null != f4) for (b3 = {}, a5 = 0; a5 < u5.attributes.length; a5++) b3[(_4 = u5.attributes[a5]).name] = _4.value;
-      for (a5 in b3) if (_4 = b3[a5], "children" == a5) ;
-      else if ("dangerouslySetInnerHTML" == a5) p5 = _4;
-      else if (!(a5 in k3)) {
-        if ("value" == a5 && "defaultValue" in k3 || "checked" == a5 && "defaultChecked" in k3) continue;
-        A(u5, a5, null, _4, r5);
-      }
-      for (a5 in k3) _4 = k3[a5], "children" == a5 ? d5 = _4 : "dangerouslySetInnerHTML" == a5 ? v5 = _4 : "value" == a5 ? g3 = _4 : "checked" == a5 ? m2 = _4 : c5 && "function" != typeof _4 || b3[a5] === _4 || A(u5, a5, _4, b3[a5], r5);
-      if (v5) c5 || p5 && (v5.__html === p5.__html || v5.__html === u5.innerHTML) || (u5.innerHTML = v5.__html), t4.__k = [];
-      else if (p5 && (u5.innerHTML = ""), P(u5, y(d5) ? d5 : [d5], t4, i5, o4, "foreignObject" === C3 ? "http://www.w3.org/1999/xhtml" : r5, f4, e4, f4 ? f4[0] : i5.__k && x(i5, 0), c5, s6), null != f4) for (a5 = f4.length; a5--; ) w(f4[a5]);
-      c5 || (a5 = "value", "progress" === C3 && null == g3 ? u5.removeAttribute("value") : void 0 !== g3 && (g3 !== u5[a5] || "progress" === C3 && !g3 || "option" === C3 && g3 !== b3[a5]) && A(u5, a5, g3, b3[a5], r5), a5 = "checked", void 0 !== m2 && m2 !== u5[a5] && A(u5, a5, m2, b3[a5], r5));
-    }
-    return u5;
-  }
-  function N(n3, u5, t4) {
-    try {
-      if ("function" == typeof n3) {
-        var i5 = "function" == typeof n3.__u;
-        i5 && n3.__u(), i5 && null == u5 || (n3.__u = n3(u5));
-      } else n3.current = u5;
-    } catch (n4) {
-      l.__e(n4, t4);
-    }
-  }
-  function V(n3, u5, t4) {
-    var i5, o4;
-    if (l.unmount && l.unmount(n3), (i5 = n3.ref) && (i5.current && i5.current !== n3.__e || N(i5, null, u5)), null != (i5 = n3.__c)) {
-      if (i5.componentWillUnmount) try {
-        i5.componentWillUnmount();
-      } catch (n4) {
-        l.__e(n4, u5);
-      }
-      i5.base = i5.__P = null;
-    }
-    if (i5 = n3.__k) for (o4 = 0; o4 < i5.length; o4++) i5[o4] && V(i5[o4], u5, t4 || "function" != typeof n3.type);
-    t4 || w(n3.__e), n3.__c = n3.__ = n3.__e = n3.__d = void 0;
-  }
-  function q(n3, l6, u5) {
-    return this.constructor(n3, u5);
-  }
-  function B(u5, t4, i5) {
-    var o4, r5, f4, e4;
-    l.__ && l.__(u5, t4), r5 = (o4 = "function" == typeof i5) ? null : i5 && i5.__k || t4.__k, f4 = [], e4 = [], O(t4, u5 = (!o4 && i5 || t4).__k = _(b, null, [u5]), r5 || h, h, t4.namespaceURI, !o4 && i5 ? [i5] : r5 ? null : t4.firstChild ? n.call(t4.childNodes) : null, f4, !o4 && i5 ? i5 : r5 ? r5.__e : t4.firstChild, o4, e4), j(f4, u5, e4);
-  }
-  function D(n3, l6) {
-    B(n3, l6, D);
-  }
-  function E(l6, u5, t4) {
-    var i5, o4, r5, f4, e4 = d({}, l6.props);
-    for (r5 in l6.type && l6.type.defaultProps && (f4 = l6.type.defaultProps), u5) "key" == r5 ? i5 = u5[r5] : "ref" == r5 ? o4 = u5[r5] : e4[r5] = void 0 === u5[r5] && void 0 !== f4 ? f4[r5] : u5[r5];
-    return arguments.length > 2 && (e4.children = arguments.length > 3 ? n.call(arguments, 2) : t4), g(l6.type, e4, i5 || l6.key, o4 || l6.ref, null);
-  }
-  n = v.slice, l = { __e: function(n3, l6, u5, t4) {
-    for (var i5, o4, r5; l6 = l6.__; ) if ((i5 = l6.__c) && !i5.__) try {
-      if ((o4 = i5.constructor) && null != o4.getDerivedStateFromError && (i5.setState(o4.getDerivedStateFromError(n3)), r5 = i5.__d), null != i5.componentDidCatch && (i5.componentDidCatch(n3, t4 || {}), r5 = i5.__d), r5) return i5.__E = i5;
-    } catch (l7) {
-      n3 = l7;
-    }
-    throw n3;
-  } }, u = 0, t = function(n3) {
-    return null != n3 && null == n3.constructor;
-  }, k.prototype.setState = function(n3, l6) {
-    var u5;
-    u5 = null != this.__s && this.__s !== this.state ? this.__s : this.__s = d({}, this.state), "function" == typeof n3 && (n3 = n3(d({}, u5), this.props)), n3 && d(u5, n3), null != n3 && this.__v && (l6 && this._sb.push(l6), S(this));
-  }, k.prototype.forceUpdate = function(n3) {
-    this.__v && (this.__e = true, n3 && this.__h.push(n3), S(this));
-  }, k.prototype.render = b, i = [], r = "function" == typeof Promise ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout, f = function(n3, l6) {
-    return n3.__v.__b - l6.__v.__b;
-  }, M.__r = 0, e = 0, c = F(false), s = F(true), a = 0;
+  // src/components/form-control.tsx
+  var import_preact14 = __require("preact");
 
-  // node_modules/.pnpm/preact-custom-element@4.3.0_preact@10.24.3/node_modules/preact-custom-element/dist/preact-custom-element.esm.js
-  function r2() {
-    return (r2 = Object.assign ? Object.assign.bind() : function(t4) {
-      for (var e4 = 1; e4 < arguments.length; e4++) {
-        var n3 = arguments[e4];
-        for (var o4 in n3) Object.prototype.hasOwnProperty.call(n3, o4) && (t4[o4] = n3[o4]);
-      }
-      return t4;
-    }).apply(this, arguments);
-  }
-  var i2 = ["context", "children"];
-  function a2(t4) {
-    this.getChildContext = function() {
-      return t4.context;
-    };
-    var e4 = t4.children, n3 = function(t5, e5) {
-      if (null == t5) return {};
-      var n4, o4, r5 = {}, i5 = Object.keys(t5);
-      for (o4 = 0; o4 < i5.length; o4++) e5.indexOf(n4 = i5[o4]) >= 0 || (r5[n4] = t5[n4]);
-      return r5;
-    }(t4, i2);
-    return E(e4, n3);
-  }
-  function s2() {
-    var o4 = new CustomEvent("_preact", { detail: {}, bubbles: true, cancelable: true });
-    this.dispatchEvent(o4), this._vdom = _(a2, r2({}, this._props, { context: o4.detail.context }), function e4(n3, o5) {
-      if (3 === n3.nodeType) return n3.data;
-      if (1 !== n3.nodeType) return null;
-      var r5 = [], i5 = {}, a5 = 0, s6 = n3.attributes, l6 = n3.childNodes;
-      for (a5 = s6.length; a5--; ) "slot" !== s6[a5].name && (i5[s6[a5].name] = s6[a5].value, i5[c2(s6[a5].name)] = s6[a5].value);
-      for (a5 = l6.length; a5--; ) {
-        var u5 = e4(l6[a5], null), d5 = l6[a5].slot;
-        d5 ? i5[d5] = _(p2, { name: d5 }, u5) : r5[a5] = u5;
-      }
-      var h3 = o5 ? _(p2, null, r5) : r5;
-      return _(o5 || n3.nodeName.toLowerCase(), i5, h3);
-    }(this, this._vdomComponent)), (this.hasAttribute("hydrate") ? D : B)(this._vdom, this._root);
-  }
-  function c2(t4) {
-    return t4.replace(/-(\w)/g, function(t5, e4) {
-      return e4 ? e4.toUpperCase() : "";
-    });
-  }
-  function l2(t4, e4, r5) {
-    if (this._vdom) {
-      var i5 = {};
-      i5[t4] = r5 = null == r5 ? void 0 : r5, i5[c2(t4)] = r5, this._vdom = E(this._vdom, i5), B(this._vdom, this._root);
-    }
-  }
-  function u2() {
-    B(this._vdom = null, this._root);
-  }
-  function p2(e4, n3) {
-    var o4 = this;
-    return _("slot", r2({}, e4, { ref: function(t4) {
-      t4 ? (o4.ref = t4, o4._listener || (o4._listener = function(t5) {
-        t5.stopPropagation(), t5.detail.context = n3;
-      }, t4.addEventListener("_preact", o4._listener))) : o4.ref.removeEventListener("_preact", o4._listener);
-    } }));
-  }
-  function preact_custom_element_esm_default(t4, e4, n3, o4) {
-    function r5() {
-      var e5 = Reflect.construct(HTMLElement, [], r5);
-      return e5._vdomComponent = t4, e5._root = o4 && o4.shadow ? e5.attachShadow({ mode: o4.mode || "open" }) : e5, e5;
-    }
-    return (r5.prototype = Object.create(HTMLElement.prototype)).constructor = r5, r5.prototype.connectedCallback = s2, r5.prototype.attributeChangedCallback = l2, r5.prototype.disconnectedCallback = u2, n3 = n3 || t4.observedAttributes || Object.keys(t4.propTypes || {}), r5.observedAttributes = n3, n3.forEach(function(t5) {
-      Object.defineProperty(r5.prototype, t5, { get: function() {
-        return this._vdom.props[t5];
-      }, set: function(e5) {
-        this._vdom ? this.attributeChangedCallback(t5, null, e5) : (this._props || (this._props = {}), this._props[t5] = e5, this.connectedCallback());
-        var n4 = typeof e5;
-        null != e5 && "string" !== n4 && "boolean" !== n4 && "number" !== n4 || this.setAttribute(t5, e5);
-      } });
-    }), customElements.define(e4 || t4.tagName || t4.displayName || t4.name, r5);
-  }
-
-  // node_modules/.pnpm/preact@10.24.3/node_modules/preact/hooks/dist/hooks.module.js
-  var t2;
-  var r3;
-  var u3;
-  var i3;
-  var o2 = 0;
-  var f2 = [];
-  var c3 = l;
-  var e2 = c3.__b;
-  var a3 = c3.__r;
-  var v2 = c3.diffed;
-  var l3 = c3.__c;
-  var m = c3.unmount;
-  var s3 = c3.__;
-  function d2(n3, t4) {
-    c3.__h && c3.__h(r3, n3, o2 || t4), o2 = 0;
-    var u5 = r3.__H || (r3.__H = { __: [], __h: [] });
-    return n3 >= u5.__.length && u5.__.push({}), u5.__[n3];
-  }
-  function y2(n3, u5) {
-    var i5 = d2(t2++, 3);
-    !c3.__s && C2(i5.__H, u5) && (i5.__ = n3, i5.i = u5, r3.__H.__h.push(i5));
-  }
-  function A2(n3) {
-    return o2 = 5, T2(function() {
-      return { current: n3 };
-    }, []);
-  }
-  function T2(n3, r5) {
-    var u5 = d2(t2++, 7);
-    return C2(u5.__H, r5) && (u5.__ = n3(), u5.__H = r5, u5.__h = n3), u5.__;
-  }
-  function j2() {
-    for (var n3; n3 = f2.shift(); ) if (n3.__P && n3.__H) try {
-      n3.__H.__h.forEach(z2), n3.__H.__h.forEach(B2), n3.__H.__h = [];
-    } catch (t4) {
-      n3.__H.__h = [], c3.__e(t4, n3.__v);
-    }
-  }
-  c3.__b = function(n3) {
-    r3 = null, e2 && e2(n3);
-  }, c3.__ = function(n3, t4) {
-    n3 && t4.__k && t4.__k.__m && (n3.__m = t4.__k.__m), s3 && s3(n3, t4);
-  }, c3.__r = function(n3) {
-    a3 && a3(n3), t2 = 0;
-    var i5 = (r3 = n3.__c).__H;
-    i5 && (u3 === r3 ? (i5.__h = [], r3.__h = [], i5.__.forEach(function(n4) {
-      n4.__N && (n4.__ = n4.__N), n4.i = n4.__N = void 0;
-    })) : (i5.__h.forEach(z2), i5.__h.forEach(B2), i5.__h = [], t2 = 0)), u3 = r3;
-  }, c3.diffed = function(n3) {
-    v2 && v2(n3);
-    var t4 = n3.__c;
-    t4 && t4.__H && (t4.__H.__h.length && (1 !== f2.push(t4) && i3 === c3.requestAnimationFrame || ((i3 = c3.requestAnimationFrame) || w2)(j2)), t4.__H.__.forEach(function(n4) {
-      n4.i && (n4.__H = n4.i), n4.i = void 0;
-    })), u3 = r3 = null;
-  }, c3.__c = function(n3, t4) {
-    t4.some(function(n4) {
-      try {
-        n4.__h.forEach(z2), n4.__h = n4.__h.filter(function(n5) {
-          return !n5.__ || B2(n5);
-        });
-      } catch (r5) {
-        t4.some(function(n5) {
-          n5.__h && (n5.__h = []);
-        }), t4 = [], c3.__e(r5, n4.__v);
-      }
-    }), l3 && l3(n3, t4);
-  }, c3.unmount = function(n3) {
-    m && m(n3);
-    var t4, r5 = n3.__c;
-    r5 && r5.__H && (r5.__H.__.forEach(function(n4) {
-      try {
-        z2(n4);
-      } catch (n5) {
-        t4 = n5;
-      }
-    }), r5.__H = void 0, t4 && c3.__e(t4, r5.__v));
-  };
-  var k2 = "function" == typeof requestAnimationFrame;
-  function w2(n3) {
-    var t4, r5 = function() {
-      clearTimeout(u5), k2 && cancelAnimationFrame(t4), setTimeout(n3);
-    }, u5 = setTimeout(r5, 100);
-    k2 && (t4 = requestAnimationFrame(r5));
-  }
-  function z2(n3) {
-    var t4 = r3, u5 = n3.__c;
-    "function" == typeof u5 && (n3.__c = void 0, u5()), r3 = t4;
-  }
-  function B2(n3) {
-    var t4 = r3;
-    n3.__c = n3.__(), r3 = t4;
-  }
-  function C2(n3, t4) {
-    return !n3 || n3.length !== t4.length || t4.some(function(t5, r5) {
-      return t5 !== n3[r5];
-    });
-  }
-
-  // node_modules/.pnpm/@preact+signals-core@1.8.0/node_modules/@preact/signals-core/dist/signals-core.module.js
-  var i4 = Symbol.for("preact-signals");
-  function t3() {
-    if (!(s4 > 1)) {
-      var i5, t4 = false;
-      while (void 0 !== h2) {
-        var r5 = h2;
-        h2 = void 0;
-        f3++;
-        while (void 0 !== r5) {
-          var o4 = r5.o;
-          r5.o = void 0;
-          r5.f &= -3;
-          if (!(8 & r5.f) && c4(r5)) try {
-            r5.c();
-          } catch (r6) {
-            if (!t4) {
-              i5 = r6;
-              t4 = true;
-            }
-          }
-          r5 = o4;
-        }
-      }
-      f3 = 0;
-      s4--;
-      if (t4) throw i5;
-    } else s4--;
-  }
-  var o3 = void 0;
-  var h2 = void 0;
-  var s4 = 0;
-  var f3 = 0;
-  var v3 = 0;
-  function e3(i5) {
-    if (void 0 !== o3) {
-      var t4 = i5.n;
-      if (void 0 === t4 || t4.t !== o3) {
-        t4 = { i: 0, S: i5, p: o3.s, n: void 0, t: o3, e: void 0, x: void 0, r: t4 };
-        if (void 0 !== o3.s) o3.s.n = t4;
-        o3.s = t4;
-        i5.n = t4;
-        if (32 & o3.f) i5.S(t4);
-        return t4;
-      } else if (-1 === t4.i) {
-        t4.i = 0;
-        if (void 0 !== t4.n) {
-          t4.n.p = t4.p;
-          if (void 0 !== t4.p) t4.p.n = t4.n;
-          t4.p = o3.s;
-          t4.n = void 0;
-          o3.s.n = t4;
-          o3.s = t4;
-        }
-        return t4;
-      }
-    }
-  }
-  function u4(i5) {
-    this.v = i5;
-    this.i = 0;
-    this.n = void 0;
-    this.t = void 0;
-  }
-  u4.prototype.brand = i4;
-  u4.prototype.h = function() {
-    return true;
-  };
-  u4.prototype.S = function(i5) {
-    if (this.t !== i5 && void 0 === i5.e) {
-      i5.x = this.t;
-      if (void 0 !== this.t) this.t.e = i5;
-      this.t = i5;
-    }
-  };
-  u4.prototype.U = function(i5) {
-    if (void 0 !== this.t) {
-      var t4 = i5.e, r5 = i5.x;
-      if (void 0 !== t4) {
-        t4.x = r5;
-        i5.e = void 0;
-      }
-      if (void 0 !== r5) {
-        r5.e = t4;
-        i5.x = void 0;
-      }
-      if (i5 === this.t) this.t = r5;
-    }
-  };
-  u4.prototype.subscribe = function(i5) {
-    var t4 = this;
-    return E2(function() {
-      var r5 = t4.value, n3 = o3;
-      o3 = void 0;
-      try {
-        i5(r5);
-      } finally {
-        o3 = n3;
-      }
-    });
-  };
-  u4.prototype.valueOf = function() {
-    return this.value;
-  };
-  u4.prototype.toString = function() {
-    return this.value + "";
-  };
-  u4.prototype.toJSON = function() {
-    return this.value;
-  };
-  u4.prototype.peek = function() {
-    var i5 = o3;
-    o3 = void 0;
-    try {
-      return this.value;
-    } finally {
-      o3 = i5;
-    }
-  };
-  Object.defineProperty(u4.prototype, "value", { get: function() {
-    var i5 = e3(this);
-    if (void 0 !== i5) i5.i = this.i;
-    return this.v;
-  }, set: function(i5) {
-    if (i5 !== this.v) {
-      if (f3 > 100) throw new Error("Cycle detected");
-      this.v = i5;
-      this.i++;
-      v3++;
-      s4++;
-      try {
-        for (var r5 = this.t; void 0 !== r5; r5 = r5.x) r5.t.N();
-      } finally {
-        t3();
-      }
-    }
-  } });
-  function d3(i5) {
-    return new u4(i5);
-  }
-  function c4(i5) {
-    for (var t4 = i5.s; void 0 !== t4; t4 = t4.n) if (t4.S.i !== t4.i || !t4.S.h() || t4.S.i !== t4.i) return true;
-    return false;
-  }
-  function a4(i5) {
-    for (var t4 = i5.s; void 0 !== t4; t4 = t4.n) {
-      var r5 = t4.S.n;
-      if (void 0 !== r5) t4.r = r5;
-      t4.S.n = t4;
-      t4.i = -1;
-      if (void 0 === t4.n) {
-        i5.s = t4;
-        break;
-      }
-    }
-  }
-  function l4(i5) {
-    var t4 = i5.s, r5 = void 0;
-    while (void 0 !== t4) {
-      var o4 = t4.p;
-      if (-1 === t4.i) {
-        t4.S.U(t4);
-        if (void 0 !== o4) o4.n = t4.n;
-        if (void 0 !== t4.n) t4.n.p = o4;
-      } else r5 = t4;
-      t4.S.n = t4.r;
-      if (void 0 !== t4.r) t4.r = void 0;
-      t4 = o4;
-    }
-    i5.s = r5;
-  }
-  function y3(i5) {
-    u4.call(this, void 0);
-    this.x = i5;
-    this.s = void 0;
-    this.g = v3 - 1;
-    this.f = 4;
-  }
-  (y3.prototype = new u4()).h = function() {
-    this.f &= -3;
-    if (1 & this.f) return false;
-    if (32 == (36 & this.f)) return true;
-    this.f &= -5;
-    if (this.g === v3) return true;
-    this.g = v3;
-    this.f |= 1;
-    if (this.i > 0 && !c4(this)) {
-      this.f &= -2;
-      return true;
-    }
-    var i5 = o3;
-    try {
-      a4(this);
-      o3 = this;
-      var t4 = this.x();
-      if (16 & this.f || this.v !== t4 || 0 === this.i) {
-        this.v = t4;
-        this.f &= -17;
-        this.i++;
-      }
-    } catch (i6) {
-      this.v = i6;
-      this.f |= 16;
-      this.i++;
-    }
-    o3 = i5;
-    l4(this);
-    this.f &= -2;
-    return true;
-  };
-  y3.prototype.S = function(i5) {
-    if (void 0 === this.t) {
-      this.f |= 36;
-      for (var t4 = this.s; void 0 !== t4; t4 = t4.n) t4.S.S(t4);
-    }
-    u4.prototype.S.call(this, i5);
-  };
-  y3.prototype.U = function(i5) {
-    if (void 0 !== this.t) {
-      u4.prototype.U.call(this, i5);
-      if (void 0 === this.t) {
-        this.f &= -33;
-        for (var t4 = this.s; void 0 !== t4; t4 = t4.n) t4.S.U(t4);
-      }
-    }
-  };
-  y3.prototype.N = function() {
-    if (!(2 & this.f)) {
-      this.f |= 6;
-      for (var i5 = this.t; void 0 !== i5; i5 = i5.x) i5.t.N();
-    }
-  };
-  Object.defineProperty(y3.prototype, "value", { get: function() {
-    if (1 & this.f) throw new Error("Cycle detected");
-    var i5 = e3(this);
-    this.h();
-    if (void 0 !== i5) i5.i = this.i;
-    if (16 & this.f) throw this.v;
-    return this.v;
-  } });
-  function w3(i5) {
-    return new y3(i5);
-  }
-  function _2(i5) {
-    var r5 = i5.u;
-    i5.u = void 0;
-    if ("function" == typeof r5) {
-      s4++;
-      var n3 = o3;
-      o3 = void 0;
-      try {
-        r5();
-      } catch (t4) {
-        i5.f &= -2;
-        i5.f |= 8;
-        g2(i5);
-        throw t4;
-      } finally {
-        o3 = n3;
-        t3();
-      }
-    }
-  }
-  function g2(i5) {
-    for (var t4 = i5.s; void 0 !== t4; t4 = t4.n) t4.S.U(t4);
-    i5.x = void 0;
-    i5.s = void 0;
-    _2(i5);
-  }
-  function p3(i5) {
-    if (o3 !== this) throw new Error("Out-of-order effect");
-    l4(this);
-    o3 = i5;
-    this.f &= -2;
-    if (8 & this.f) g2(this);
-    t3();
-  }
-  function b2(i5) {
-    this.x = i5;
-    this.u = void 0;
-    this.s = void 0;
-    this.o = void 0;
-    this.f = 32;
-  }
-  b2.prototype.c = function() {
-    var i5 = this.S();
-    try {
-      if (8 & this.f) return;
-      if (void 0 === this.x) return;
-      var t4 = this.x();
-      if ("function" == typeof t4) this.u = t4;
-    } finally {
-      i5();
-    }
-  };
-  b2.prototype.S = function() {
-    if (1 & this.f) throw new Error("Cycle detected");
-    this.f |= 1;
-    this.f &= -9;
-    _2(this);
-    a4(this);
-    s4++;
-    var i5 = o3;
-    o3 = this;
-    return p3.bind(this, i5);
-  };
-  b2.prototype.N = function() {
-    if (!(2 & this.f)) {
-      this.f |= 2;
-      this.o = h2;
-      h2 = this;
-    }
-  };
-  b2.prototype.d = function() {
-    this.f |= 8;
-    if (!(1 & this.f)) g2(this);
-  };
-  function E2(i5) {
-    var t4 = new b2(i5);
-    try {
-      t4.c();
-    } catch (i6) {
-      t4.d();
-      throw i6;
-    }
-    return t4.d.bind(t4);
-  }
-
-  // node_modules/.pnpm/@preact+signals@1.3.0_preact@10.24.3/node_modules/@preact/signals/dist/signals.module.js
-  var v4;
-  var s5;
-  function l5(n3, i5) {
-    l[n3] = i5.bind(null, l[n3] || function() {
-    });
-  }
-  function d4(n3) {
-    if (s5) s5();
-    s5 = n3 && n3.S();
-  }
-  function p4(n3) {
-    var r5 = this, f4 = n3.data, o4 = useSignal(f4);
-    o4.value = f4;
-    var e4 = T2(function() {
-      var n4 = r5.__v;
-      while (n4 = n4.__) if (n4.__c) {
-        n4.__c.__$f |= 4;
-        break;
-      }
-      r5.__$u.c = function() {
-        var n5;
-        if (!t(e4.peek()) && 3 === (null == (n5 = r5.base) ? void 0 : n5.nodeType)) r5.base.data = e4.peek();
-        else {
-          r5.__$f |= 1;
-          r5.setState({});
-        }
-      };
-      return w3(function() {
-        var n5 = o4.value.value;
-        return 0 === n5 ? 0 : true === n5 ? "" : n5 || "";
-      });
-    }, []);
-    return e4.value;
-  }
-  p4.displayName = "_st";
-  Object.defineProperties(u4.prototype, { constructor: { configurable: true, value: void 0 }, type: { configurable: true, value: p4 }, props: { configurable: true, get: function() {
-    return { data: this };
-  } }, __b: { configurable: true, value: 1 } });
-  l5("__b", function(n3, r5) {
-    if ("string" == typeof r5.type) {
-      var i5, t4 = r5.props;
-      for (var f4 in t4) if ("children" !== f4) {
-        var o4 = t4[f4];
-        if (o4 instanceof u4) {
-          if (!i5) r5.__np = i5 = {};
-          i5[f4] = o4;
-          t4[f4] = o4.peek();
-        }
-      }
-    }
-    n3(r5);
-  });
-  l5("__r", function(n3, r5) {
-    d4();
-    var i5, t4 = r5.__c;
-    if (t4) {
-      t4.__$f &= -2;
-      if (void 0 === (i5 = t4.__$u)) t4.__$u = i5 = function(n4) {
-        var r6;
-        E2(function() {
-          r6 = this;
-        });
-        r6.c = function() {
-          t4.__$f |= 1;
-          t4.setState({});
-        };
-        return r6;
-      }();
-    }
-    v4 = t4;
-    d4(i5);
-    n3(r5);
-  });
-  l5("__e", function(n3, r5, i5, t4) {
-    d4();
-    v4 = void 0;
-    n3(r5, i5, t4);
-  });
-  l5("diffed", function(n3, r5) {
-    d4();
-    v4 = void 0;
-    var i5;
-    if ("string" == typeof r5.type && (i5 = r5.__e)) {
-      var t4 = r5.__np, f4 = r5.props;
-      if (t4) {
-        var o4 = i5.U;
-        if (o4) for (var e4 in o4) {
-          var u5 = o4[e4];
-          if (void 0 !== u5 && !(e4 in t4)) {
-            u5.d();
-            o4[e4] = void 0;
-          }
-        }
-        else i5.U = o4 = {};
-        for (var a5 in t4) {
-          var c5 = o4[a5], s6 = t4[a5];
-          if (void 0 === c5) {
-            c5 = _3(i5, a5, s6, f4);
-            o4[a5] = c5;
-          } else c5.o(s6, f4);
-        }
-      }
-    }
-    n3(r5);
-  });
-  function _3(n3, r5, i5, t4) {
-    var f4 = r5 in n3 && void 0 === n3.ownerSVGElement, o4 = d3(i5);
-    return { o: function(n4, r6) {
-      o4.value = n4;
-      t4 = r6;
-    }, d: E2(function() {
-      var i6 = o4.value.value;
-      if (t4[r5] !== i6) {
-        t4[r5] = i6;
-        if (f4) n3[r5] = i6;
-        else if (i6) n3.setAttribute(r5, i6);
-        else n3.removeAttribute(r5);
-      }
-    }) };
-  }
-  l5("unmount", function(n3, r5) {
-    if ("string" == typeof r5.type) {
-      var i5 = r5.__e;
-      if (i5) {
-        var t4 = i5.U;
-        if (t4) {
-          i5.U = void 0;
-          for (var f4 in t4) {
-            var o4 = t4[f4];
-            if (o4) o4.d();
-          }
-        }
-      }
-    } else {
-      var e4 = r5.__c;
-      if (e4) {
-        var u5 = e4.__$u;
-        if (u5) {
-          e4.__$u = void 0;
-          u5.d();
-        }
-      }
-    }
-    n3(r5);
-  });
-  l5("__h", function(n3, r5, i5, t4) {
-    if (t4 < 3 || 9 === t4) r5.__$f |= 2;
-    n3(r5, i5, t4);
-  });
-  k.prototype.shouldComponentUpdate = function(n3, r5) {
-    var i5 = this.__$u;
-    if (!(i5 && void 0 !== i5.s || 4 & this.__$f)) return true;
-    if (3 & this.__$f) return true;
-    for (var t4 in r5) return true;
-    for (var f4 in n3) if ("__source" !== f4 && n3[f4] !== this.props[f4]) return true;
-    for (var o4 in this.props) if (!(o4 in n3)) return true;
-    return false;
-  };
-  function useSignal(n3) {
-    return T2(function() {
-      return d3(n3);
-    }, []);
-  }
+  // src/components/input.tsx
+  var import_preact = __require("preact");
 
   // src/hooks/value.tsx
+  var import_signals = __require("@preact/signals");
+  var import_hooks = __require("preact/hooks");
   function useValue(value) {
-    const v5 = useSignal(null);
-    y2(() => {
+    const v = (0, import_signals.useSignal)(null);
+    (0, import_hooks.useEffect)(() => {
       if (value == void 0) return;
-      v5.value = value;
+      v.value = value;
     }, [value]);
-    return { value: v5 };
+    return { value: v };
+  }
+
+  // src/hooks/name.tsx
+  var import_signals2 = __require("@preact/signals");
+  var import_hooks2 = __require("preact/hooks");
+
+  // src/utils/index.ts
+  var import_recursive_iterator = __toESM(__require("recursive-iterator"), 1);
+
+  // src/utils/singleton.ts
+  function singleton(key, value) {
+    if (!window[key]) {
+      window[key] = value;
+    }
+    return window[key];
+  }
+
+  // src/utils/caches.ts
+  var CacheData = class {
+    constructor() {
+      this.cache = /* @__PURE__ */ new Map();
+    }
+    set(key, value) {
+      this.cache.set(key, value);
+    }
+    get(key) {
+      return this.cache.get(key);
+    }
+    delete(key) {
+      this.cache.delete(key);
+    }
+    has(key) {
+      return this.cache.has(key);
+    }
+    clear() {
+      this.cache.clear();
+    }
+  };
+  function caches() {
+    const cacheName = "_caches";
+    return singleton(cacheName, new CacheData());
   }
 
   // src/utils/index.ts
-  var import_recursive_iterator = __toESM(require_RecursiveIterator());
-  var index = 0;
   var generateIndex = () => {
+    let index = singleton("_index", 0);
     return index++;
   };
   var mergeTo = (value, obj) => {
@@ -1177,7 +140,7 @@
       } else {
         return JSON.parse(JSON.stringify(ctx));
       }
-    } catch (e4) {
+    } catch (e) {
     }
     return ctx;
   };
@@ -1254,27 +217,27 @@
     return value;
   };
   function getFormData(form, opts) {
-    const o4 = {
+    const o = {
       trim: false,
       json: true,
       key: "name"
     };
     if (opts && opts.trim != void 0) {
-      o4.trim = opts.trim;
+      o.trim = opts.trim;
     }
     if (opts && opts.json != void 0) {
-      o4.json = opts.json;
+      o.json = opts.json;
     }
     if (opts && opts.key != void 0) {
-      o4.key = opts.key;
+      o.key = opts.key;
     }
     const formData = new FormData(form);
     const data = {};
-    const isTrim = o4.trim;
+    const isTrim = o.trim;
     Array.from(form.elements).forEach((item) => {
       const value = opts?.is_sanitize == void 0 || opts?.is_sanitize ? sanitize(item["value"]) : item["value"];
       let name = item["name"];
-      if (o4.key == "data-name") {
+      if (o.key == "data-name") {
         name = item.dataset.name;
       }
       if (name) {
@@ -1291,7 +254,7 @@
       }
     });
     delete data.PreventChromeAutocomplete;
-    if (o4.json == false) {
+    if (o.json == false) {
       Object.keys(data).forEach((key) => {
         if (!formData.has(key)) {
           formData.append(key, data[key]);
@@ -1312,132 +275,80 @@
     });
   };
   var selectSize = (dic, size) => {
-    let v5 = null;
-    const keys = Object.keys(dic).sort((a5, b3) => Number(a5) > Number(b3) ? 1 : -1);
-    for (let i5 = 0; i5 < keys.length; i5++) {
-      const key = keys[i5];
+    let v = null;
+    const keys = Object.keys(dic).sort((a, b) => Number(a) > Number(b) ? 1 : -1);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
       const value = Number(key);
       if (size <= value) {
-        v5 = dic[key];
+        v = dic[key];
         break;
       }
-      if (keys.length - 1 === i5) {
-        v5 = dic[key];
+      if (keys.length - 1 === i) {
+        v = dic[key];
       }
     }
-    return v5;
+    return v;
   };
-  var PubSub = class {
-    constructor() {
-      this.callbacks = {};
-    }
-    /**
-     * 
-     * @param key - ensures that the subscriber has a unique handler for the event 
-     * @param event - subscriber event
-     * @param handler - subscriber handler to event 
-     */
-    register(key, event, handler) {
-      if (!this.callbacks[key]) {
-        this.callbacks[key] = {};
-      }
-      this.callbacks[key][event] = handler;
-    }
-    /**
-     * @param event - event to broadcast
-     * @param payload - data to broadcast
-     */
-    broadcast(event, payload) {
-      const callbacks = Object.keys(this.callbacks).reduce((accu, key) => {
-        const config = this.callbacks[key];
-        if (config[event]) {
-          accu.push(config[event]);
-        }
-        return accu;
-      }, []);
-      if (callbacks && callbacks.length) {
-        callbacks.forEach((callback) => {
-          callback(payload);
-        });
-      }
-    }
-    clean(id) {
-      delete this.callbacks[id];
-    }
-  };
-  var InstanceCount = class {
-    constructor() {
-      this._count = 0;
-    }
-    get count() {
-      return this._count;
-    }
-    increment() {
-      this._count += 1;
-    }
-    decrement() {
-      this._count -= 1;
-    }
-  };
-  var toBool = (test, a5, b3) => {
+  var toBool = (test, a, b) => {
     switch (test) {
       case "eq":
         {
-          return a5 == b3;
+          return a == b;
         }
         ;
       case "ne":
         {
-          return a5 != b3;
+          return a != b;
         }
         ;
       case "gt":
         {
-          return a5 > b3;
+          return a > b;
         }
         ;
       case "lt":
         {
-          return a5 < b3;
+          return a < b;
         }
         ;
       case "gte":
         {
-          return a5 >= b3;
+          return a >= b;
         }
         ;
       case "lte":
         {
-          return a5 <= b3;
+          return a <= b;
         }
         ;
       case "in":
         {
-          return a5.includes(b3);
+          return a.includes(b);
         }
         ;
       case "notIn":
         {
-          return !a5.includes(b3);
+          return !a.includes(b);
         }
         ;
       case "truthy": {
-        const test2 = !!b3 || b3 == "0";
+        const test2 = !!b || b == "0";
         return test2;
       }
       case "contains":
         {
-          return a5.includes(b3);
+          return a.includes(b);
         }
         ;
       case "notContains": {
-        return !a5.includes(b3);
+        return !a.includes(b);
       }
       case "startsWith": {
-        return a5.startsWith(b3);
+        return a.startsWith(b);
       }
       case "endsWith": {
-        return a5.endsWith(b3);
+        return a.endsWith(b);
       }
       case "any": {
         return true;
@@ -1462,29 +373,29 @@
     };
     const variant = variants.filter((item) => {
       const { test, data } = item?.fn || {};
-      let t4 = false;
+      let t = false;
       if (typeof test == "boolean") {
-        t4 = test;
+        t = test;
       } else if (typeof test == "object") {
         const testItem = (test2) => Object.keys(test2).every((key) => {
           if (key.includes("caches.")) {
-            const [a5, b3, c5] = key.split(".");
-            const parent = caches.get(b3);
+            const [a, b, c] = key.split(".");
+            const parent = caches().get(b);
             if (!parent) {
               return false;
             }
-            return testCtx(test2[key], parent.get(c5));
+            return testCtx(test2[key], parent.get(c));
           } else {
             return testCtx(test2[key], payload[key]);
           }
         });
         if (Array.isArray(test)) {
-          t4 = test.every((item2) => testItem(item2));
+          t = test.every((item2) => testItem(item2));
         } else {
-          t4 = testItem(test);
+          t = testItem(test);
         }
       }
-      return t4;
+      return t;
     });
     return variant;
   };
@@ -1525,32 +436,15 @@
       return {};
     }
   };
-  var CacheData = class {
-    constructor() {
-      this.cache = /* @__PURE__ */ new Map();
-    }
-    set(key, value) {
-      this.cache.set(key, value);
-    }
-    get(key) {
-      return this.cache.get(key);
-    }
-    delete(key) {
-      this.cache.delete(key);
-    }
-    clear() {
-      this.cache.clear();
-    }
-  };
   function Stack(array, callback) {
-    const l6 = array.length;
-    let index2 = 0;
+    const l = array.length;
+    let index = 0;
     const cache = [];
     function recurse(callback2, rej, res) {
-      if (index2 < l6) {
-        const item = array[index2];
-        callback2(item, index2).then((result) => {
-          index2 += 1;
+      if (index < l) {
+        const item = array[index];
+        callback2(item, index).then((result) => {
+          index += 1;
           cache.push(result);
           recurse(callback2, rej, res);
         }).catch((err) => {
@@ -1571,32 +465,247 @@
 
   // src/hooks/name.tsx
   function useName(value) {
-    const v5 = useSignal(null);
-    y2(() => {
+    const v = (0, import_signals2.useSignal)(null);
+    (0, import_hooks2.useEffect)(() => {
       if (isFalsy(value)) return;
-      v5.value = value;
+      v.value = value;
     }, [value]);
-    return { name: v5 };
+    return { name: v };
   }
 
   // src/hooks/is-view.tsx
+  var import_signals3 = __require("@preact/signals");
+  var import_hooks3 = __require("preact/hooks");
   function useIsView(value) {
-    const v5 = useSignal(false);
-    y2(() => {
-      v5.value = value || false;
+    const v = (0, import_signals3.useSignal)(false);
+    (0, import_hooks3.useEffect)(() => {
+      v.value = value || false;
     }, [value]);
-    return { isView: v5 };
+    return { isView: v };
+  }
+
+  // src/hooks/trigger.tsx
+  var import_hooks4 = __require("preact/hooks");
+
+  // src/signals/index.ts
+  var import_signals4 = __require("@preact/signals");
+  var submitSignal = (0, import_signals4.signal)(null);
+  var pubSignal = (0, import_signals4.signal)({
+    value: null,
+    name: null,
+    event: null
+  });
+
+  // src/hooks/trigger.tsx
+  function useTrigger(config, name, value) {
+    (0, import_hooks4.useEffect)(() => {
+      if (isFalsy(config)) return;
+      if (isFalsy(name)) return;
+      if (isFalsy(value)) return;
+      if (!config.length) {
+        return console.error(`trigger config of ${name} must be an array`);
+      }
+      config.forEach((event) => {
+        pubSignal.value = { value, name, event };
+      });
+    }, [config, name, value]);
+  }
+
+  // src/hooks/subscribe.tsx
+  var import_hooks5 = __require("preact/hooks");
+  var import_signals6 = __require("@preact/signals");
+
+  // src/utils/pubsub.ts
+  var PubSub = class {
+    constructor() {
+      this.callbacks = {};
+    }
+    /**
+     * 
+     * @param key - ensures that the subscriber has a unique handler for the event 
+     * @param event - subscriber event
+     * @param handler - subscriber handler to event 
+     */
+    register(key, event, handler) {
+      if (!this.callbacks[key]) {
+        this.callbacks[key] = {};
+      }
+      this.callbacks[key][event] = handler;
+    }
+    /**
+     * @param event - event to broadcast
+     * @param payload - data to broadcast
+     */
+    broadcast(event, payload) {
+      const callbacks = Object.keys(this.callbacks).reduce((accu, key) => {
+        const config = this.callbacks[key];
+        if (config[event]) {
+          accu.push(config[event]);
+        }
+        return accu;
+      }, []);
+      if (callbacks && callbacks.length) {
+        callbacks.forEach((callback) => {
+          callback(payload);
+        });
+      }
+    }
+    clean(id) {
+      delete this.callbacks[id];
+    }
+  };
+  function pubsub() {
+    const cacheName = "_pubsub";
+    return singleton(cacheName, new PubSub());
+  }
+
+  // src/hooks/subscribe.tsx
+  function useSubscribe(config, controlName, v) {
+    const options = (0, import_signals6.useSignal)(null);
+    const isLoading = (0, import_signals6.useSignal)(false);
+    const value = (0, import_signals6.useSignal)(null);
+    const type = (0, import_signals6.useSignal)(null);
+    (0, import_hooks5.useEffect)(() => {
+      if (isFalsy(config)) return;
+      if (isFalsy(controlName)) return;
+      if (isLoading.value) return;
+      const { name, event } = pubSignal.value;
+      config.forEach((subscribe) => {
+        const { change, config: config2 } = subscribe;
+        type.value = change;
+        if (change == "value") {
+          const _config = config2;
+          const { fields, macro } = _config;
+          if (fields) {
+            if (macro == "sum") {
+              value.value = fields.reduce((accu, field) => {
+                if (caches().has(field)) {
+                  const val = caches().get(field).get("value");
+                  accu += parseInt(val) || 0;
+                }
+                return accu;
+              }, 0);
+            }
+          }
+        } else if (change == "options") {
+          const _config = config2;
+          const { options: localOptions, option_api } = _config;
+          const value2 = pubSignal.value;
+          if (option_api) {
+            const { url, cache, map } = option_api;
+            if (!url) return;
+            const data = {
+              value: value2,
+              name
+            };
+            if (cache) {
+              cache.forEach((c) => {
+                !isFalsy(caches().get(c)) && (data[c] = caches().get(c).get("value"));
+              });
+            }
+            ;
+            const replacedUrl = replace(url, data);
+            isLoading.value = true;
+            fetchOptions(replacedUrl, map).then((res) => {
+              isLoading.value = false;
+              if (!Array.isArray(res)) throw new Error("Invalid response, options should be an array of ({label:string, value:string})[]");
+              options.value = createOptions(res, value2);
+            }).catch((err) => isLoading.value = false);
+          } else if (localOptions?.length) {
+            options.value = createOptions(localOptions, value2);
+          }
+        }
+      });
+      return () => {
+        config.forEach((subscribe) => {
+          pubsub().clean(subscribe.event);
+        });
+      };
+    }, [config, controlName, v, pubSignal.value]);
+    return { options, isLoading, value, type };
+  }
+
+  // src/components/input.tsx
+  var import_hooks8 = __require("preact/hooks");
+
+  // src/hooks/cache.tsx
+  var import_hooks6 = __require("preact/hooks");
+  var import_signals8 = __require("@preact/signals");
+  function useCache(cache, name, value, text) {
+    const t = (0, import_signals8.useSignal)(/* @__PURE__ */ new Map());
+    (0, import_hooks6.useEffect)(() => {
+      if (isFalsy(cache)) return;
+      if (name == null) return;
+      const data = /* @__PURE__ */ new Map();
+      data.set("name", name);
+      data.set("value", value);
+      data.set("text", text);
+      caches().set(name, data);
+      t.value = data;
+      return () => {
+        t.value = null;
+      };
+    }, [cache, name, value, text]);
+    return { cacheValue: t };
+  }
+
+  // src/hooks/data.tsx
+  var import_signals9 = __require("@preact/signals");
+  var import_hooks7 = __require("preact/hooks");
+  function useData(propsData, def) {
+    const data = (0, import_signals9.useSignal)(def || {});
+    (0, import_hooks7.useEffect)(() => {
+      data.value = reviveData(propsData);
+    }, [propsData]);
+    return { data };
   }
 
   // src/components/input.tsx
   var Input = (props) => {
+    const inputRef = (0, import_hooks8.useRef)(null);
     const { value } = useValue(props.value);
     const { name } = useName(props.name);
     const { isView } = useIsView(props.is_view);
-    const onInput = (e4) => value.value = e4.currentTarget.value;
-    return /* @__PURE__ */ _("div", { class: "form-group" }, props.label && /* @__PURE__ */ _("label", { class: "form-label", for: name.value }, props.label), /* @__PURE__ */ _(
+    const { data } = useData(props.data);
+    useTrigger(props?.event?.trigger, name.value, value.value);
+    const { cacheValue } = useCache(props.cache, name.value, value.value, name.value);
+    const { value: macroValue } = useSubscribe(props?.event?.subscribe, name.value, cacheValue.value);
+    (0, import_hooks8.useMemo)(() => {
+      value.value = macroValue.value;
+    }, [macroValue.value]);
+    const onInput = (e) => value.value = e.currentTarget.value;
+    (0, import_hooks8.useEffect)(() => {
+      const observer = new MutationObserver((mutationList, observer2) => {
+        for (const mutation of mutationList) {
+          if (mutation.type === "attributes") {
+            if (mutation.attributeName === "value") {
+              value.value = mutation.target.getAttribute("value");
+              observer2.disconnect();
+            }
+          }
+        }
+      });
+      observer.observe(inputRef.current, {
+        attributes: true,
+        childList: false,
+        subtree: false
+      });
+      return () => {
+        observer.disconnect();
+      };
+    }, [value.value]);
+    (0, import_hooks8.useEffect)(() => {
+      if (data.value[name.value] == void 0) {
+        value.value = null;
+      } else {
+        value.value = data.value[name.value];
+      }
+    }, [data.value, name.value]);
+    return /* @__PURE__ */ (0, import_preact.h)("div", { class: "form-group" }, props.label && /* @__PURE__ */ (0, import_preact.h)("label", { class: "form-label", for: name.value }, props.label), /* @__PURE__ */ (0, import_preact.h)(
       "input",
       {
+        ref: inputRef,
+        "data-name": name.value,
         "data-tag": props.tag,
         onInput,
         value: value.value,
@@ -1604,7 +713,7 @@
         type: props.type,
         placeholder: props.placeholder || "",
         id: name.value,
-        ...isView.value ? { "data-name": name.value } : { name: name.value },
+        ...isView.value ? {} : { name: name.value },
         ...props.readonly || isView.value ? { readonly: true } : {},
         ...props.disabled ? { disabled: true } : {},
         ...props.validator ? { "data-validator": props.validator } : {}
@@ -1614,12 +723,13 @@
   var input_default = Input;
 
   // src/components/textarea.tsx
+  var import_preact2 = __require("preact");
   function Textarea(props) {
     const { isView } = useIsView(props.is_view);
     const { value } = useValue(props.value);
     const { name } = useName(props.name);
-    const onInput = (e4) => value.value = e4.currentTarget.value;
-    return /* @__PURE__ */ _("div", { class: "form-group" }, /* @__PURE__ */ _("label", { for: props.name, class: "form-label " }, props.display), /* @__PURE__ */ _(
+    const onInput = (e) => value.value = e.currentTarget.value;
+    return /* @__PURE__ */ (0, import_preact2.h)("div", { class: "form-group" }, /* @__PURE__ */ (0, import_preact2.h)("label", { for: props.name, class: "form-label " }, props.display), /* @__PURE__ */ (0, import_preact2.h)(
       "textarea",
       {
         onInput,
@@ -1642,15 +752,23 @@
   }
 
   // src/components/label.tsx
+  var import_preact3 = __require("preact");
   function Label(props) {
-    return /* @__PURE__ */ _("label", { class: "form-label", for: props.name }, props.label);
+    return /* @__PURE__ */ (0, import_preact3.h)("label", { class: "form-label", for: props.name }, props.label);
   }
 
+  // src/components/select.tsx
+  var import_signals13 = __require("@preact/signals");
+  var import_preact5 = __require("preact");
+  var import_hooks14 = __require("preact/hooks");
+
   // src/hooks/options-api.tsx
+  var import_signals10 = __require("@preact/signals");
+  var import_hooks9 = __require("preact/hooks");
   function useRemoteOptions(config, selectedValue, name, isChanged) {
-    const options = useSignal(null);
-    const isLoading = useSignal(false);
-    y2(() => {
+    const options = (0, import_signals10.useSignal)(null);
+    const isLoading = (0, import_signals10.useSignal)(false);
+    (0, import_hooks9.useEffect)(() => {
       if (isChanged) return;
       if (isFalsy(config)) return;
       if (isFalsy(config?.url)) return;
@@ -1662,8 +780,8 @@
       const data = { [name]: selectedValue, value: selectedValue };
       name && (data.name = name);
       if (cache) {
-        cache.forEach((c5) => {
-          !isFalsy(caches.get(c5)) && (data[c5] = caches.get(c5).get("value"));
+        cache.forEach((c) => {
+          !isFalsy(caches().get(c)) && (data[c] = caches().get(c).get("value"));
         });
       }
       ;
@@ -1678,9 +796,11 @@
   }
 
   // src/hooks/options.tsx
+  var import_signals11 = __require("@preact/signals");
+  var import_hooks10 = __require("preact/hooks");
   function useLocalOptions(opts, selectedValue, isChanged) {
-    const options = useSignal(null);
-    y2(() => {
+    const options = (0, import_signals11.useSignal)(null);
+    (0, import_hooks10.useEffect)(() => {
       if (isChanged) return;
       if (!opts?.length) return;
       options.value = createOptions(opts, selectedValue);
@@ -1689,11 +809,13 @@
   }
 
   // src/hooks/variants.tsx
+  var import_signals12 = __require("@preact/signals");
+  var import_hooks11 = __require("preact/hooks");
   function useVariants(config, name, value, text, initialData) {
-    const controls2 = useSignal([]);
-    const data = useSignal({});
-    const isLoading = useSignal(false);
-    y2(() => {
+    const controls2 = (0, import_signals12.useSignal)([]);
+    const data = (0, import_signals12.useSignal)({});
+    const isLoading = (0, import_signals12.useSignal)(false);
+    (0, import_hooks11.useEffect)(() => {
       if (!config) return;
       if (!name) return;
       if (isLoading.value) return;
@@ -1744,177 +866,90 @@
     };
   }
 
-  // src/hooks/data.tsx
-  function useData(propsData, def) {
-    const data = useSignal(def || {});
-    y2(() => {
-      data.value = reviveData(propsData);
-    }, [propsData]);
-    return { data };
-  }
-
-  // src/hooks/options-subscribe.tsx
-  function useSubscribeOptions(config, name) {
-    const options = useSignal(null);
-    const isLoading = useSignal(false);
-    y2(() => {
-      if (isFalsy(config)) return;
-      if (isFalsy(name)) return;
-      if (isLoading.value) return;
-      const propsName = name;
-      config.forEach((subscribe) => {
-        const { event, options: localOptions, option_api } = subscribe;
-        pubsub.register(propsName, subscribe.event, (data) => {
-          const { name: name2, value, event: event2 } = data;
-          if (option_api) {
-            const { url, cache, map } = option_api;
-            if (!url) return;
-            const data2 = {
-              value,
-              name: name2
-            };
-            if (cache) {
-              cache.forEach((c5) => {
-                !isFalsy(caches.get(c5)) && (data2[c5] = caches.get(c5).get("value"));
-              });
-            }
-            ;
-            const replacedUrl = replace(url, data2);
-            isLoading.value = true;
-            fetchOptions(replacedUrl, map).then((res) => {
-              isLoading.value = false;
-              if (!Array.isArray(res)) throw new Error("Invalid response, options should be an array of ({label:string, value:string})[]");
-              options.value = createOptions(res, value);
-            }).catch((err) => isLoading.value = false);
-          } else if (localOptions?.length) {
-            options.value = createOptions(localOptions, value);
-          }
-        });
-      });
-      return () => {
-        config.forEach((subscribe) => {
-          pubsub.clean(subscribe.event);
-        });
-      };
-    }, [config, name]);
-    return { options, isLoading };
-  }
-
-  // src/const/index.ts
-  var FORM_CHANGE_EVENT = "form-value-change";
-
-  // src/hooks/trigger.tsx
-  function useTrigger(config, name, value) {
-    y2(() => {
-      if (isFalsy(config)) return;
-      if (isFalsy(name)) return;
-      if (isFalsy(value)) return;
-      if (!config.length) {
-        return console.error(`trigger config of ${name} must be an array`);
-      }
-      config.forEach((event) => {
-        document.dispatchEvent(
-          new CustomEvent(FORM_CHANGE_EVENT, {
-            detail: { value, name, event }
-          })
-        );
-      });
-    }, [config, name, value]);
-  }
-
   // src/components/visibile.tsx
+  var import_hooks12 = __require("preact/hooks");
   function Visible({ children, when }) {
-    const isVisible = T2(() => !isFalsy(when), [when]);
+    const isVisible = (0, import_hooks12.useMemo)(() => !isFalsy(when), [when]);
     return isVisible ? children : null;
   }
 
   // src/components/control-loader.tsx
+  var import_preact4 = __require("preact");
+  var import_hooks13 = __require("preact/hooks");
   function ControlLoader({ children, when }) {
-    const isLoading = T2(() => !isFalsy(when), [when]);
-    return /* @__PURE__ */ _("div", { style: {
+    const isLoading = (0, import_hooks13.useMemo)(() => !isFalsy(when), [when]);
+    return /* @__PURE__ */ (0, import_preact4.h)("div", { style: {
       display: "grid",
       gridAutoFlow: "column",
       gridTemplateColumns: "1fr max-content",
       alignContent: "center",
       alignItems: "center",
       gridGap: "4px"
-    } }, children, /* @__PURE__ */ _(Visible, { when: isLoading }, /* @__PURE__ */ _("div", null, /* @__PURE__ */ _("div", { class: "spinner-border text-secondary spinner-border-sm", role: "status" }, /* @__PURE__ */ _("span", { class: "visually-hidden" })))));
-  }
-
-  // src/hooks/cache.tsx
-  function useCache(cache, name, value, text) {
-    y2(() => {
-      if (isFalsy(cache)) return;
-      const data = /* @__PURE__ */ new Map();
-      data.set("name", name);
-      data.set("value", value);
-      data.set("text", text);
-      caches.set(name, data);
-      return () => {
-        caches.delete(name);
-      };
-    }, [cache, name, value, text]);
+    } }, children, /* @__PURE__ */ (0, import_preact4.h)(Visible, { when: isLoading }, /* @__PURE__ */ (0, import_preact4.h)("div", null, /* @__PURE__ */ (0, import_preact4.h)("div", { class: "spinner-border text-secondary spinner-border-sm", role: "status" }, /* @__PURE__ */ (0, import_preact4.h)("span", { class: "visually-hidden" })))));
   }
 
   // src/components/select.tsx
   function Select(props) {
     const { isView } = useIsView(props.is_view);
-    const options = useSignal([]);
+    const options = (0, import_signals13.useSignal)([]);
     const { value: selectedValue } = useValue(props.value);
     const { value: placeholder } = useValue(props.placeholder);
     const { value: name } = useValue(props.name);
-    const selectedText = useSignal(null);
-    const variants = useSignal([]);
-    const controlRef = A2(null);
-    const isLoading = useSignal(false);
-    const isChanged = useSignal(false);
+    const selectedText = (0, import_signals13.useSignal)(null);
+    const variants = (0, import_signals13.useSignal)([]);
+    const controlRef = (0, import_hooks14.useRef)(null);
+    const isLoading = (0, import_signals13.useSignal)(false);
+    const isChanged = (0, import_signals13.useSignal)(false);
     const { data } = useData(props.data);
     const { options: remoteOptions, isLoading: isRemoteOptionsLoading } = useRemoteOptions(props.option_api, selectedValue.value, name.value, isChanged.value);
     const { options: localOptions } = useLocalOptions(props.options, selectedValue.value, isChanged.value);
-    const { options: subscribeOptions, isLoading: isSubscribeOptionsLoading } = useSubscribeOptions(props?.event?.subscribe, name.value);
+    const { options: subscribeOptions, isLoading: isSubscribeOptionsLoading } = useSubscribe(props?.event?.subscribe, name.value);
     const { controls: variantControls, data: variantData, isLoading: isVariantLoading } = useVariants(props.variants, name.value, selectedValue.value, selectedText.value, props.data);
-    T2(() => {
+    (0, import_hooks14.useMemo)(() => {
       if (isView.value) throw new Error(`Select component is not allowed in view mode`);
     }, [isView.value]);
-    T2(() => {
+    (0, import_hooks14.useMemo)(() => {
       const opts = subscribeOptions.value || remoteOptions.value || localOptions.value || [];
       if (placeholder.value) {
         opts.unshift({ label: placeholder, value: null });
       }
       options.value = opts;
     }, [remoteOptions.value, localOptions.value, subscribeOptions.value]);
-    T2(() => {
+    (0, import_hooks14.useMemo)(() => {
       isLoading.value = isRemoteOptionsLoading.value || isSubscribeOptionsLoading.value || isVariantLoading.value;
     }, [
       isRemoteOptionsLoading.value,
       isSubscribeOptionsLoading.value,
       isVariantLoading.value
     ]);
-    T2(() => {
+    (0, import_hooks14.useMemo)(() => {
       data.value = { ...data.value, ...variantData.value };
       variants.value = variantControls.value;
     }, [variantControls.value, variantData.value]);
     useTrigger(props?.event?.trigger, name.value, selectedValue.value);
     useCache(props.cache, name.value, selectedValue.value, selectedText.value);
-    y2(() => {
-      if (data.value[name.value] == void 0) return;
-      selectedValue.value = data.value[name.value];
+    (0, import_hooks14.useEffect)(() => {
+      if (data.value[name.value] == void 0) {
+        selectedValue.value = null;
+      } else {
+        selectedValue.value = data.value[name.value];
+      }
     }, [data.value, name.value]);
-    const changeHandler = async (e4) => {
-      const target = e4.target;
+    const changeHandler = async (e) => {
+      const target = e.target;
       if (!target) return;
       isChanged.value = true;
       selectedValue.value = target.value;
-      selectedText.value = Array.from(target.selectedOptions).reduce((accu, iter, index2) => accu + iter.text + (target.selectedOptions.length - 1 == index2 ? "" : ","), "");
+      selectedText.value = Array.from(target.selectedOptions).reduce((accu, iter, index) => accu + iter.text + (target.selectedOptions.length - 1 == index ? "" : ","), "");
     };
-    return /* @__PURE__ */ _(
+    return /* @__PURE__ */ (0, import_preact5.h)(
       "div",
       {
         class: `form-group control-select ${props.help ? "has-help" : ""} mb-3`,
         style: { width: props.width }
       },
-      /* @__PURE__ */ _("label", { for: name.value, class: "form-label fs-12 roboto-regular" }, props.label),
-      /* @__PURE__ */ _(ControlLoader, { when: isLoading.value }, /* @__PURE__ */ _(
+      /* @__PURE__ */ (0, import_preact5.h)("label", { for: name.value, class: "form-label fs-12 roboto-regular" }, props.label),
+      /* @__PURE__ */ (0, import_preact5.h)(ControlLoader, { when: isLoading.value }, /* @__PURE__ */ (0, import_preact5.h)(
         "select",
         {
           ref: controlRef,
@@ -1923,17 +958,18 @@
           onChange: changeHandler,
           class: "form-select form-control",
           "aria-label": "Default select example",
+          "data-name": name.value,
           ...props.validator ? { "data-validator": props.validator } : {},
           ...props.readonly ? { disabled: true } : {}
         },
-        options.value.map((item, index2) => {
+        options.value.map((item, index) => {
           if (item.selected) {
-            return /* @__PURE__ */ _("option", { key: item.id, value: item.value, selected: true }, item.label);
+            return /* @__PURE__ */ (0, import_preact5.h)("option", { key: item.id, value: item.value, selected: true }, item.label);
           }
-          return /* @__PURE__ */ _("option", { key: item.id, value: item.value }, item.label);
+          return /* @__PURE__ */ (0, import_preact5.h)("option", { key: item.id, value: item.value }, item.label);
         })
       )),
-      /* @__PURE__ */ _(
+      /* @__PURE__ */ (0, import_preact5.h)(
         "input",
         {
           type: "hidden",
@@ -1942,7 +978,7 @@
           value: selectedValue.value
         }
       ),
-      /* @__PURE__ */ _(Visible, { when: variants.value.length }, /* @__PURE__ */ _(
+      /* @__PURE__ */ (0, import_preact5.h)(Visible, { when: variants.value.length }, /* @__PURE__ */ (0, import_preact5.h)(
         FormControl,
         {
           controls: variants.value,
@@ -1953,60 +989,63 @@
   }
 
   // src/components/data-list.tsx
+  var import_signals14 = __require("@preact/signals");
+  var import_preact6 = __require("preact");
+  var import_hooks15 = __require("preact/hooks");
   function DataList(props) {
     const { isView } = useIsView(props.is_view);
-    const options = useSignal([]);
+    const options = (0, import_signals14.useSignal)([]);
     const { value } = useValue(props.value);
     const { value: name } = useValue(props.name);
-    const variants = useSignal([]);
-    const isLoading = useSignal(false);
-    const isChanged = useSignal(false);
+    const variants = (0, import_signals14.useSignal)([]);
+    const isLoading = (0, import_signals14.useSignal)(false);
+    const isChanged = (0, import_signals14.useSignal)(false);
     const { data } = useData(props.data);
     const { options: remoteOptions, isLoading: isRemoteOptionsLoading } = useRemoteOptions(props.option_api, value.value, name.value, isChanged.value);
     const { options: localOptions } = useLocalOptions(props.options, value.value, isChanged.value);
-    const { options: subscribeOptions, isLoading: isSubscribeOptionsLoading } = useSubscribeOptions(props?.event?.subscribe, name.value);
+    const { options: subscribeOptions, isLoading: isSubscribeOptionsLoading, value: macroValue } = useSubscribe(props?.event?.subscribe, name.value);
     const { controls: variantControls, data: variantData, isLoading: isVariantLoading } = useVariants(props.variants, name.value, value.value, value.value, props.data);
-    T2(() => {
+    (0, import_hooks15.useMemo)(() => {
       if (isView.value) throw new Error(`Select component is not allowed in view mode`);
     }, [isView.value]);
-    T2(() => {
+    (0, import_hooks15.useMemo)(() => {
       options.value = subscribeOptions.value || remoteOptions.value || localOptions.value || [];
     }, [remoteOptions.value, localOptions.value, subscribeOptions.value]);
-    T2(() => {
+    (0, import_hooks15.useMemo)(() => {
       isLoading.value = isRemoteOptionsLoading.value || isSubscribeOptionsLoading.value || isVariantLoading.value;
     }, [
       isRemoteOptionsLoading.value,
       isSubscribeOptionsLoading.value,
       isVariantLoading.value
     ]);
-    T2(() => {
+    (0, import_hooks15.useMemo)(() => {
       data.value = { ...data.value, ...variantData.value };
       variants.value = variantControls.value;
     }, [variantControls.value, variantData.value]);
     useTrigger(props?.event?.trigger, name.value, value.value);
-    y2(() => {
+    (0, import_hooks15.useEffect)(() => {
       if (data.value[name.value] == void 0) return;
       value.value = data.value[name.value];
     }, [data.value, name.value]);
-    y2(() => {
+    (0, import_hooks15.useEffect)(() => {
       if (props.readonly == true) {
         throw new Error("datalist cannot be readonly, use input instead");
       }
     }, []);
-    const changeHandler = async (e4) => {
-      const target = e4.target;
+    const changeHandler = async (e) => {
+      const target = e.target;
       if (!target) return;
       isChanged.value = true;
       value.value = target.value;
     };
-    return /* @__PURE__ */ _(
+    return /* @__PURE__ */ (0, import_preact6.h)(
       "div",
       {
         class: `form-group  ${props.help ? "has-help" : ""} mb-3`,
         style: { width: props.width }
       },
-      /* @__PURE__ */ _("label", { for: name.value, class: "form-label fs-12 roboto-regular" }, props.label),
-      /* @__PURE__ */ _(ControlLoader, { when: isLoading.value }, /* @__PURE__ */ _(
+      /* @__PURE__ */ (0, import_preact6.h)("label", { for: name.value, class: "form-label fs-12 roboto-regular" }, props.label),
+      /* @__PURE__ */ (0, import_preact6.h)(ControlLoader, { when: isLoading.value }, /* @__PURE__ */ (0, import_preact6.h)(
         "input",
         {
           "data-tag": props.tag,
@@ -2019,14 +1058,14 @@
           ...props.validator ? { "data-validator": props.validator } : {},
           onChange: changeHandler
         }
-      ), /* @__PURE__ */ _("datalist", { id: `${name.value}s` }, options.value.map((item) => /* @__PURE__ */ _(
+      ), /* @__PURE__ */ (0, import_preact6.h)("datalist", { id: `${name.value}s` }, options.value.map((item) => /* @__PURE__ */ (0, import_preact6.h)(
         "option",
         {
           value: item.value,
           key: String(item.value).split(" ").join("")
         }
       )))),
-      /* @__PURE__ */ _(Visible, { when: variants.value.length }, /* @__PURE__ */ _(
+      /* @__PURE__ */ (0, import_preact6.h)(Visible, { when: variants.value.length }, /* @__PURE__ */ (0, import_preact6.h)(
         FormControl,
         {
           controls: variants.value,
@@ -2037,23 +1076,25 @@
   }
 
   // src/components/checkbox-group.tsx
+  var import_preact7 = __require("preact");
+  var import_signals15 = __require("@preact/signals");
   function CheckboxGroup(props) {
-    const variants = useSignal({});
-    const changeHandler = (e4) => {
-      const value = getControlValue(e4.target);
-      const id = String(e4.target.value).toLowerCase().replaceAll(" ", "-");
+    const variants = (0, import_signals15.useSignal)({});
+    const changeHandler = (e) => {
+      const value = getControlValue(e.target);
+      const id = String(e.target.value).toLowerCase().replaceAll(" ", "-");
       if (!value) {
         variants[id] = [];
         return;
       }
       const variantConfig = props.variants.find(
-        (item) => item.ref_name == e4.target.name
+        (item) => item.ref_name == e.target.name
       );
       variants[id] = restructureControls(variantConfig?.controls?.data || []);
     };
-    return /* @__PURE__ */ _("div", { class: "checkbox-group-container" }, /* @__PURE__ */ _("label", { class: "" }, props.label), props.options.map((item) => {
+    return /* @__PURE__ */ (0, import_preact7.h)("div", { class: "checkbox-group-container" }, /* @__PURE__ */ (0, import_preact7.h)("label", { class: "" }, props.label), props.options.map((item) => {
       const id = String(item.value).toLowerCase().replaceAll(" ", "-");
-      return /* @__PURE__ */ _("div", { class: "checkbox-group-item form-group" }, /* @__PURE__ */ _("div", { class: "form-check form-switch" }, /* @__PURE__ */ _(
+      return /* @__PURE__ */ (0, import_preact7.h)("div", { class: "checkbox-group-item form-group" }, /* @__PURE__ */ (0, import_preact7.h)("div", { class: "form-check form-switch" }, /* @__PURE__ */ (0, import_preact7.h)(
         "input",
         {
           "data-tag": props.tag,
@@ -2064,20 +1105,22 @@
           name: props.name,
           class: "form-check-input"
         }
-      ), /* @__PURE__ */ _("label", { for: id, class: "form-check-label" }, item.label)), /* @__PURE__ */ _(Visible, { when: (variants[id] || []).length }, /* @__PURE__ */ _(FormControl, { controls: variants[id] })));
+      ), /* @__PURE__ */ (0, import_preact7.h)("label", { for: id, class: "form-check-label" }, item.label)), /* @__PURE__ */ (0, import_preact7.h)(Visible, { when: (variants[id] || []).length }, /* @__PURE__ */ (0, import_preact7.h)(FormControl, { controls: variants[id] })));
     }));
   }
 
   // src/components/radio-group.tsx
+  var import_preact8 = __require("preact");
+  var import_signals16 = __require("@preact/signals");
   function RadioGroup(props) {
-    const currentId = useSignal(null);
-    const variants = useSignal({});
-    const orientation = useSignal(props.orientation || "vertical");
-    const options = useSignal(props.options || []);
-    const changeHandler = (e4) => {
-      const value = getControlValue(e4.target);
-      const key = `${e4.target.name} - ${value}`;
-      const id = String(e4.target.value).toLowerCase().replaceAll(" ", "-");
+    const currentId = (0, import_signals16.useSignal)(null);
+    const variants = (0, import_signals16.useSignal)({});
+    const orientation = (0, import_signals16.useSignal)(props.orientation || "vertical");
+    const options = (0, import_signals16.useSignal)(props.options || []);
+    const changeHandler = (e) => {
+      const value = getControlValue(e.target);
+      const key = `${e.target.name} - ${value}`;
+      const id = String(e.target.value).toLowerCase().replaceAll(" ", "-");
       const variantConfig = props.variants.find((item) => {
         return item.ref_name == key;
       });
@@ -2096,9 +1139,9 @@
         return item;
       });
     };
-    return /* @__PURE__ */ _("div", { class: "radio-container form-group", style: { width: props.width } }, /* @__PURE__ */ _("label", null, props.label), /* @__PURE__ */ _("div", { class: `radio-item-container ${orientation.value}` }, options.value.map((item) => {
+    return /* @__PURE__ */ (0, import_preact8.h)("div", { class: "radio-container form-group", style: { width: props.width } }, /* @__PURE__ */ (0, import_preact8.h)("label", null, props.label), /* @__PURE__ */ (0, import_preact8.h)("div", { class: `radio-item-container ${orientation.value}` }, options.value.map((item) => {
       const id = String(item.value).toLowerCase().replaceAll(" ", "-");
-      return /* @__PURE__ */ _("div", { class: "radio-item form-group" }, /* @__PURE__ */ _("div", null, /* @__PURE__ */ _(
+      return /* @__PURE__ */ (0, import_preact8.h)("div", { class: "radio-item form-group" }, /* @__PURE__ */ (0, import_preact8.h)("div", null, /* @__PURE__ */ (0, import_preact8.h)(
         "input",
         {
           type: "radio",
@@ -2108,28 +1151,28 @@
           onChange: changeHandler,
           "data-tag": props.tag
         }
-      ), /* @__PURE__ */ _("label", { for: id }, item.label)), /* @__PURE__ */ _(Visible, { when: item?.controls?.length }, /* @__PURE__ */ _(FormControl, { controls: item.controls, data: props.data })));
+      ), /* @__PURE__ */ (0, import_preact8.h)("label", { for: id }, item.label)), /* @__PURE__ */ (0, import_preact8.h)(Visible, { when: item?.controls?.length }, /* @__PURE__ */ (0, import_preact8.h)(FormControl, { controls: item.controls, data: props.data })));
     })));
   }
 
-  // src/signals/index.ts
-  var submitSignal = d3(null);
-
   // src/components/repeatable.tsx
+  var import_preact9 = __require("preact");
+  var import_hooks16 = __require("preact/hooks");
+  var import_signals17 = __require("@preact/signals");
   function Repeatable(props) {
-    const uniqueId = useSignal(generateUniqueId());
-    const datas = useSignal([]);
-    const viewDatas = useSignal([]);
-    const formRef = A2(null);
-    const formControls = useSignal(props?.children || []);
-    y2(() => {
+    const uniqueId = (0, import_signals17.useSignal)(generateUniqueId());
+    const datas = (0, import_signals17.useSignal)([]);
+    const viewDatas = (0, import_signals17.useSignal)([]);
+    const formRef = (0, import_hooks16.useRef)(null);
+    const formControls = (0, import_signals17.useSignal)(props?.children || []);
+    (0, import_hooks16.useEffect)(() => {
       const values = (props?.data || {})[props.name];
       if (values?.length) {
         viewDatas.value = values.map((value) => restructureControls(value));
         console.log("repeatable receives values");
       }
     }, [props.data]);
-    y2(() => {
+    (0, import_hooks16.useEffect)(() => {
       if (!submitSignal?.value?.id) {
         return;
       }
@@ -2150,20 +1193,20 @@
         }
       });
     }, [submitSignal.value]);
-    const deleteHandler = (e4) => {
-      const target = e4.target;
+    const deleteHandler = (e) => {
+      const target = e.target;
       const key = target.dataset.key;
       const id = target.dataset.id;
-      datas.value = datas.value.reduce((accu, item, index2) => {
-        if (id != index2) {
+      datas.value = datas.value.reduce((accu, item, index) => {
+        if (id != index) {
           accu.push(item);
         }
         return accu;
       }, []);
       viewDatas.value = datas.value;
     };
-    const addHandler = (e4) => {
-      e4.preventDefault();
+    const addHandler = (e) => {
+      e.preventDefault();
       const data = getFormData(formRef.current, {
         key: "data-name"
       });
@@ -2191,13 +1234,13 @@
       formRef.current.reset();
       submitSignal.value = { id: uniqueId.value };
     };
-    return /* @__PURE__ */ _("div", { class: "repeatable-container card my-3" }, /* @__PURE__ */ _("div", { class: "repeatable-content card-body" }, /* @__PURE__ */ _("fieldset", null, /* @__PURE__ */ _("legend", null, props.label), viewDatas.value.map((item, index2) => {
+    return /* @__PURE__ */ (0, import_preact9.h)("div", { class: "repeatable-container card my-3" }, /* @__PURE__ */ (0, import_preact9.h)("div", { class: "repeatable-content card-body" }, /* @__PURE__ */ (0, import_preact9.h)("fieldset", null, /* @__PURE__ */ (0, import_preact9.h)("legend", null, props.label), viewDatas.value.map((item, index) => {
       const value = item.reduce((accu, iter) => {
         accu[iter.name] = iter.value;
         return accu;
       }, {});
       console.log("rendering datas.value");
-      return /* @__PURE__ */ _("details", null, /* @__PURE__ */ _("summary", null, `${props.label} - ${index2 + 1}`), /* @__PURE__ */ _("div", null, /* @__PURE__ */ _(
+      return /* @__PURE__ */ (0, import_preact9.h)("details", null, /* @__PURE__ */ (0, import_preact9.h)("summary", null, `${props.label} - ${index + 1}`), /* @__PURE__ */ (0, import_preact9.h)("div", null, /* @__PURE__ */ (0, import_preact9.h)(
         FormControl,
         {
           controls: item,
@@ -2206,17 +1249,17 @@
           is_from_repeatable: true,
           is_view: true
         }
-      ), /* @__PURE__ */ _("br", null), /* @__PURE__ */ _(
+      ), /* @__PURE__ */ (0, import_preact9.h)("br", null), /* @__PURE__ */ (0, import_preact9.h)(
         "button",
         {
           type: "button",
           onClick: deleteHandler,
-          "data-id": index2,
+          "data-id": index,
           class: "btn btn-danger"
         },
         "Remove"
-      ), /* @__PURE__ */ _("div", { style: "height:50px" })));
-    }), !props.is_view && /* @__PURE__ */ _("details", null, /* @__PURE__ */ _("summary", null, props.label, " Form"), /* @__PURE__ */ _(
+      ), /* @__PURE__ */ (0, import_preact9.h)("div", { style: "height:50px" })));
+    }), !props.is_view && /* @__PURE__ */ (0, import_preact9.h)("details", null, /* @__PURE__ */ (0, import_preact9.h)("summary", null, props.label, " Form"), /* @__PURE__ */ (0, import_preact9.h)(
       "form",
       {
         onSubmit: addHandler,
@@ -2225,7 +1268,7 @@
         id: uniqueId.value,
         "data-type": "repeatable"
       },
-      /* @__PURE__ */ _(
+      /* @__PURE__ */ (0, import_preact9.h)(
         FormControl,
         {
           controls: formControls.value,
@@ -2233,11 +1276,11 @@
           is_from_repeatable: true
         }
       ),
-      /* @__PURE__ */ _("br", null),
-      /* @__PURE__ */ _("button", { type: "reset", class: "btn btn-warning" }, "Reset"),
+      /* @__PURE__ */ (0, import_preact9.h)("br", null),
+      /* @__PURE__ */ (0, import_preact9.h)("button", { type: "reset", class: "btn btn-warning" }, "Reset"),
       "\xA0",
-      /* @__PURE__ */ _("button", { type: "submit", class: "btn btn-success" }, "Submit")
-    ), /* @__PURE__ */ _(
+      /* @__PURE__ */ (0, import_preact9.h)("button", { type: "submit", class: "btn btn-success" }, "Submit")
+    ), /* @__PURE__ */ (0, import_preact9.h)(
       "input",
       {
         type: "hidden",
@@ -2246,31 +1289,34 @@
         value: JSON.stringify(datas.value),
         "data-tag": props.tag
       }
-    )), props.is_view && !viewDatas.value.length ? /* @__PURE__ */ _("details", null, /* @__PURE__ */ _("summary", null, "empty")) : /* @__PURE__ */ _(b, null))));
+    )), props.is_view && !viewDatas.value.length ? /* @__PURE__ */ (0, import_preact9.h)("details", null, /* @__PURE__ */ (0, import_preact9.h)("summary", null, "empty")) : /* @__PURE__ */ (0, import_preact9.h)(import_preact9.Fragment, null))));
   }
 
   // src/components/input-check.tsx
+  var import_signals19 = __require("@preact/signals");
+  var import_preact10 = __require("preact");
+  var import_hooks17 = __require("preact/hooks");
   var InputCheck = (props) => {
     const { isView } = useIsView(props.is_view);
-    const value = useSignal(false);
-    const inputRef = A2(null);
+    const value = (0, import_signals19.useSignal)(false);
+    const inputRef = (0, import_hooks17.useRef)(null);
     const { data } = useData(props.data);
     const { name } = useName(props.name);
-    const variants = useSignal([]);
-    T2(() => {
+    const variants = (0, import_signals19.useSignal)([]);
+    (0, import_hooks17.useMemo)(() => {
       if (!(props.value == true || props.value == false)) return;
       value.value = props.value;
     }, [props.value]);
     const { controls: variantControls, data: variantData } = useVariants(props.variants, props.name, value.value, value.value, props.data);
-    T2(() => {
+    (0, import_hooks17.useMemo)(() => {
       data.value = variantData.value;
       variants.value = variantControls.value;
     }, [variantControls.value, variantData.value]);
-    const onInput = (e4) => {
-      const checked = e4.currentTarget.checked;
+    const onInput = (e) => {
+      const checked = e.currentTarget.checked;
       value.value = checked;
     };
-    return /* @__PURE__ */ _("div", { class: " my-3" }, /* @__PURE__ */ _("div", { class: "form-check" }, /* @__PURE__ */ _(
+    return /* @__PURE__ */ (0, import_preact10.h)("div", { class: " my-3" }, /* @__PURE__ */ (0, import_preact10.h)("div", { class: "form-check" }, /* @__PURE__ */ (0, import_preact10.h)(
       "input",
       {
         ref: inputRef,
@@ -2285,7 +1331,7 @@
         ...props.disabled ? { disabled: true } : {},
         ...props.validator ? { "data-validator": props.validator } : {}
       }
-    ), props.label && /* @__PURE__ */ _(b, null, "\xA0", /* @__PURE__ */ _("label", { class: "form-check-label", for: name.value }, props.label))), /* @__PURE__ */ _(Visible, { when: variants.value.length }, /* @__PURE__ */ _(
+    ), props.label && /* @__PURE__ */ (0, import_preact10.h)(import_preact10.Fragment, null, "\xA0", /* @__PURE__ */ (0, import_preact10.h)("label", { class: "form-check-label", for: name.value }, props.label))), /* @__PURE__ */ (0, import_preact10.h)(Visible, { when: variants.value.length }, /* @__PURE__ */ (0, import_preact10.h)(
       FormControl,
       {
         controls: variantControls.value,
@@ -2296,8 +1342,9 @@
   var input_check_default = InputCheck;
 
   // src/components/form-group.tsx
+  var import_preact11 = __require("preact");
   function FormGroup(props) {
-    return /* @__PURE__ */ _(
+    return /* @__PURE__ */ (0, import_preact11.h)(
       "div",
       {
         class: `
@@ -2305,24 +1352,30 @@
         ${props.classes ?? ""} 
       `
       },
-      props.label ? /* @__PURE__ */ _("p", { class: "" }, props.label) : /* @__PURE__ */ _(b, null),
-      /* @__PURE__ */ _("div", { class: "form-group-controls" }, props.children)
+      props.label ? /* @__PURE__ */ (0, import_preact11.h)("p", { class: "" }, props.label) : /* @__PURE__ */ (0, import_preact11.h)(import_preact11.Fragment, null),
+      /* @__PURE__ */ (0, import_preact11.h)("div", { class: "form-group-controls" }, props.children)
     );
   }
 
+  // src/components/form-control.tsx
+  var import_hooks21 = __require("preact/hooks");
+
   // src/components/row.tsx
+  var import_preact12 = __require("preact");
+  var import_hooks18 = __require("preact/hooks");
+  var import_signals20 = __require("@preact/signals");
   function Row(props) {
-    const responsive = T2(() => {
+    const responsive = (0, import_hooks18.useMemo)(() => {
       return props.responsive;
     }, [props.responsive]);
-    const id = useSignal(window.crypto.randomUUID());
-    const containerRef = A2(null);
-    const prevBreak = useSignal("");
-    const hasBreak = useSignal(false);
+    const id = (0, import_signals20.useSignal)(window.crypto.randomUUID());
+    const containerRef = (0, import_hooks18.useRef)(null);
+    const prevBreak = (0, import_signals20.useSignal)("");
+    const hasBreak = (0, import_signals20.useSignal)(false);
     const applyBreaks = (target, breaks, windowWidth) => {
       if (!target) return;
-      const w4 = selectSize(breaks, windowWidth);
-      let current = `form-cols-${w4}`;
+      const w = selectSize(breaks, windowWidth);
+      let current = `form-cols-${w}`;
       if (prevBreak.value != current) {
         prevBreak.value && target.classList.remove(prevBreak.value);
         target.classList.add(current);
@@ -2334,23 +1387,23 @@
       }
       ;
     };
-    y2(() => {
+    (0, import_hooks18.useEffect)(() => {
       if (responsive && containerRef.current) {
         const windowWidth = getWindowWidth();
         const { breaks, width } = responsive;
         if (breaks) {
           hasBreak.value = true;
           applyBreaks(containerRef.current, breaks, windowWidth);
-          pubsub.register(id.value, "def", ({ windowWidth: windowWidth2 }) => {
+          pubsub().register(id.value, "def", ({ windowWidth: windowWidth2 }) => {
             applyBreaks(containerRef.current, breaks, windowWidth2);
           });
         }
       }
       return () => {
-        pubsub.clean(id.value);
+        pubsub().clean(id.value);
       };
     }, []);
-    return /* @__PURE__ */ _(
+    return /* @__PURE__ */ (0, import_preact12.h)(
       "div",
       {
         class: `
@@ -2359,48 +1412,51 @@
       `,
         ref: containerRef
       },
-      props.label ? /* @__PURE__ */ _("p", { class: "" }, props.label) : /* @__PURE__ */ _(b, null),
-      /* @__PURE__ */ _("div", { class: "form-cols" }, props.children)
+      props.label ? /* @__PURE__ */ (0, import_preact12.h)("p", { class: "" }, props.label) : /* @__PURE__ */ (0, import_preact12.h)(import_preact12.Fragment, null),
+      /* @__PURE__ */ (0, import_preact12.h)("div", { class: "form-cols" }, props.children)
     );
   }
 
   // src/components/col.tsx
+  var import_preact13 = __require("preact");
+  var import_hooks19 = __require("preact/hooks");
+  var import_signals21 = __require("@preact/signals");
   function Col(props) {
-    const responsive = T2(() => {
+    const responsive = (0, import_hooks19.useMemo)(() => {
       return props.responsive;
     }, [props.responsive]);
-    const id = useSignal(window.crypto.randomUUID());
-    const containerRef = A2(null);
-    const prevWidth = useSignal("");
+    const id = (0, import_signals21.useSignal)(window.crypto.randomUUID());
+    const containerRef = (0, import_hooks19.useRef)(null);
+    const prevWidth = (0, import_signals21.useSignal)("");
     const applyWidth = (target, widths, windowWidth) => {
       if (!target) return;
-      const w4 = selectSize(widths, windowWidth);
-      if (prevWidth.value != w4) {
-        target.style.width = w4;
-        prevWidth.value = w4;
+      const w = selectSize(widths, windowWidth);
+      if (prevWidth.value != w) {
+        target.style.width = w;
+        prevWidth.value = w;
       } else {
-        if (!target.classList.contains(w4)) {
-          target.style.width = w4;
+        if (!target.classList.contains(w)) {
+          target.style.width = w;
         }
       }
       ;
     };
-    y2(() => {
+    (0, import_hooks19.useEffect)(() => {
       if (responsive && containerRef.current) {
         const windowWidth = getWindowWidth();
         const { breaks, width } = responsive;
         if (width) {
           applyWidth(containerRef.current, width, windowWidth);
-          pubsub.register(id.value, "def", ({ windowWidth: windowWidth2 }) => {
+          pubsub().register(id.value, "def", ({ windowWidth: windowWidth2 }) => {
             applyWidth(containerRef.current, width, windowWidth2);
           });
         }
       }
       return () => {
-        pubsub.clean(id.value);
+        pubsub().clean(id.value);
       };
     }, []);
-    return /* @__PURE__ */ _(
+    return /* @__PURE__ */ (0, import_preact13.h)(
       "div",
       {
         class: `
@@ -2409,16 +1465,18 @@
       `,
         ref: containerRef
       },
-      props.label ? /* @__PURE__ */ _("p", { class: "" }, props.label) : /* @__PURE__ */ _(b, null),
-      /* @__PURE__ */ _("div", { class: "form-col-item" }, props.children)
+      props.label ? /* @__PURE__ */ (0, import_preact13.h)("p", { class: "" }, props.label) : /* @__PURE__ */ (0, import_preact13.h)(import_preact13.Fragment, null),
+      /* @__PURE__ */ (0, import_preact13.h)("div", { class: "form-col-item" }, props.children)
     );
   }
 
   // src/hooks/controls.tsx
+  var import_signals22 = __require("@preact/signals");
+  var import_hooks20 = __require("preact/hooks");
   function useControls(controls2, data) {
     const { data: controlsData } = useData(controls2, []);
-    const ctrls = useSignal([]);
-    y2(() => {
+    const ctrls = (0, import_signals22.useSignal)([]);
+    (0, import_hooks20.useEffect)(() => {
       if (isFalsy(controlsData.value?.length)) return;
       ctrls.value = restructureControls(controlsData, data).map(
         (control) => {
@@ -2444,22 +1502,43 @@
     };
   }
 
+  // src/utils/instance.ts
+  var InstanceCount = class {
+    constructor() {
+      this._count = 0;
+    }
+    get count() {
+      return this._count;
+    }
+    increment() {
+      this._count += 1;
+    }
+    decrement() {
+      this._count -= 1;
+    }
+  };
+  function instanceCount() {
+    const instanceCountName = "_instanceCount";
+    return singleton(instanceCountName, new InstanceCount());
+  }
+
   // src/components/form-control.tsx
   function FormControl(props) {
     const { data } = useData(props.data);
     const { controls: controls2 } = useControls(props.controls, data.value);
-    y2(() => {
-      instanceCount.increment();
+    (0, import_hooks21.useEffect)(() => {
+      instanceCount().increment();
       return () => {
-        if (instanceCount.count > 0) {
-          instanceCount.decrement();
+        if (instanceCount().count > 0) {
+          instanceCount().decrement();
         }
+        caches().clear();
       };
     }, []);
-    return /* @__PURE__ */ _(b, null, controls2.value.map((ctrl) => {
+    return /* @__PURE__ */ (0, import_preact14.h)(import_preact14.Fragment, null, controls2.value.map((ctrl) => {
       let { control, child, id } = ctrl;
       if (control.tag == "group") {
-        return /* @__PURE__ */ _(
+        return /* @__PURE__ */ (0, import_preact14.h)(
           FormGroup,
           {
             key: id,
@@ -2469,7 +1548,7 @@
             is_from_repeatable: props.is_from_repeatable,
             ...control
           },
-          /* @__PURE__ */ _(
+          /* @__PURE__ */ (0, import_preact14.h)(
             FormControl,
             {
               controls: child,
@@ -2480,7 +1559,7 @@
           )
         );
       } else if (control.tag == "row") {
-        return /* @__PURE__ */ _(
+        return /* @__PURE__ */ (0, import_preact14.h)(
           Row,
           {
             key: id,
@@ -2490,7 +1569,7 @@
             is_from_repeatable: props.is_from_repeatable,
             ...control
           },
-          /* @__PURE__ */ _(
+          /* @__PURE__ */ (0, import_preact14.h)(
             FormControl,
             {
               controls: child,
@@ -2501,13 +1580,13 @@
           )
         );
       } else if (control.tag == "col") {
-        return /* @__PURE__ */ _(
+        return /* @__PURE__ */ (0, import_preact14.h)(
           Col,
           {
             key: id,
             ...control
           },
-          /* @__PURE__ */ _(
+          /* @__PURE__ */ (0, import_preact14.h)(
             FormControl,
             {
               controls: child,
@@ -2518,7 +1597,7 @@
           )
         );
       } else if (["input", "mobile", "input-inline"].includes(control.tag)) {
-        return /* @__PURE__ */ _(
+        return /* @__PURE__ */ (0, import_preact14.h)(
           input_default,
           {
             key: id,
@@ -2529,7 +1608,7 @@
           }
         );
       } else if (control.tag == "check") {
-        return /* @__PURE__ */ _(
+        return /* @__PURE__ */ (0, import_preact14.h)(
           input_check_default,
           {
             key: id,
@@ -2540,7 +1619,7 @@
           }
         );
       } else if (control.tag == "textarea") {
-        return /* @__PURE__ */ _(
+        return /* @__PURE__ */ (0, import_preact14.h)(
           Textarea,
           {
             key: id,
@@ -2551,9 +1630,9 @@
           }
         );
       } else if (control.tag == "label") {
-        return /* @__PURE__ */ _(Label, { key: id, label: control.label, name: control.name });
+        return /* @__PURE__ */ (0, import_preact14.h)(Label, { key: id, label: control.label, name: control.name });
       } else if (["select", "select-inline"].includes(control.tag)) {
-        return /* @__PURE__ */ _(
+        return /* @__PURE__ */ (0, import_preact14.h)(
           Select,
           {
             key: id,
@@ -2564,7 +1643,7 @@
           }
         );
       } else if (control.tag == "datalist") {
-        return /* @__PURE__ */ _(
+        return /* @__PURE__ */ (0, import_preact14.h)(
           DataList,
           {
             key: id,
@@ -2575,7 +1654,7 @@
           }
         );
       } else if (control.tag == "checkbox") {
-        return /* @__PURE__ */ _(
+        return /* @__PURE__ */ (0, import_preact14.h)(
           CheckboxGroup,
           {
             key: id,
@@ -2586,7 +1665,7 @@
           }
         );
       } else if (control.tag == "radio") {
-        return /* @__PURE__ */ _(
+        return /* @__PURE__ */ (0, import_preact14.h)(
           RadioGroup,
           {
             key: id,
@@ -2597,7 +1676,7 @@
           }
         );
       } else if (control.tag == "repeatable") {
-        return /* @__PURE__ */ _(
+        return /* @__PURE__ */ (0, import_preact14.h)(
           Repeatable,
           {
             key: id,
@@ -2608,12 +1687,14 @@
           }
         );
       } else {
-        return /* @__PURE__ */ _(b, null);
+        return /* @__PURE__ */ (0, import_preact14.h)(import_preact14.Fragment, null);
       }
     }));
   }
 
   // src/components/form.tsx
+  var import_preact15 = __require("preact");
+  var import_hooks22 = __require("preact/hooks");
   var controlInputKey = {
     id: 1,
     tag: "input",
@@ -2995,31 +2076,67 @@
   };
   var allControls = [...controls, variantControl];
   function Form(props) {
-    const formControls = T2(() => {
+    const formControls = (0, import_hooks22.useMemo)(() => {
       return allControls;
     }, [props.data]);
-    return /* @__PURE__ */ _("form", null, /* @__PURE__ */ _(FormControl, { controls: formControls, data: props.data }), /* @__PURE__ */ _("button", { type: "submit", class: "btn btn-success" }, "Submit"));
+    return /* @__PURE__ */ (0, import_preact15.h)("form", null, /* @__PURE__ */ (0, import_preact15.h)(FormControl, { controls: formControls, data: props.data }), /* @__PURE__ */ (0, import_preact15.h)("button", { type: "submit", class: "btn btn-success" }, "Submit"));
   }
 
-  // src/index.ts
-  preact_custom_element_esm_default(FormControl, "x-form-control", ["controls", "data"]);
-  preact_custom_element_esm_default(Form, "x-form", ["data"]);
-  var pubsub = new PubSub();
-  var instanceCount = new InstanceCount();
-  var caches = new CacheData();
-  window.addEventListener("resize", (e4) => {
-    console.log("instanceCount.value", instanceCount.count);
-    if (!instanceCount.count) {
-      caches.clear();
-      return;
-    }
-    ;
-    const windowWidth = getWindowWidth();
-    pubsub.broadcast("def", { windowWidth });
-  });
-  document.addEventListener(FORM_CHANGE_EVENT, (e4) => {
-    const detail = e4.detail;
-    if (!detail?.event) return;
-    pubsub.broadcast(detail.event, detail);
-  });
+  // src/const/index.ts
+  var FORM_CHANGE_EVENT = "form-value-change";
+
+  // src/object/register-custom.ts
+  function registerCustomElement() {
+    (0, import_preact_custom_element.default)(FormControl, "x-form-control", ["controls", "data"]);
+    (0, import_preact_custom_element.default)(Form, "x-form", ["data"]);
+    window.addEventListener("resize", (e) => {
+      console.log("instanceCount.value", instanceCount().count);
+      if (!instanceCount().count) {
+        caches().clear();
+        return;
+      }
+      ;
+      const windowWidth = getWindowWidth();
+      pubsub().broadcast("def", { windowWidth });
+    });
+    document.addEventListener(FORM_CHANGE_EVENT, (e) => {
+      const detail = e.detail;
+      if (!detail?.event) return;
+      pubsub().broadcast(detail.event, detail);
+    });
+  }
+
+  // src/utils/walker.ts
+  function walker(array, callback) {
+    return array.map((item) => {
+      const { children } = item;
+      if (children) {
+        return {
+          ...item,
+          children: children.map((child) => {
+            const { variants } = child;
+            if (variants) {
+              return variants.map((variant) => {
+                const { controls: controls2 } = variant;
+                if (controls2) {
+                  return {
+                    ...variant,
+                    controls: controls2.map((control) => {
+                      return callback(control);
+                    })
+                  };
+                }
+                return variant;
+              });
+            }
+            return child;
+          })
+        };
+      }
+      ;
+      return callback(item);
+    });
+  }
+  return __toCommonJS(src_exports);
 })();
+//# sourceMappingURL=index.iife.js.map

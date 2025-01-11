@@ -34,6 +34,11 @@ export type HelpType = {
   icon: any;
 };
 
+export interface LabelValue {
+  label: string;
+  value: string;
+}
+
 export type FormControlItemType = {
   id: number;
   tag: TagType;
@@ -64,7 +69,7 @@ export type FormControlItemType = {
   responsive?: number;
   event?: {
     trigger?: string[];
-    suscribe?: string[];
+    subscribe?: SubscribeItemType[];
   };
   orientation?: "portrait" | "landscape";
 };
@@ -74,6 +79,22 @@ export type OptionApiType = {
   url: string;
   map: any;
   cache: string[]
+}
+
+export interface SubscribeItemType {
+  event: string;
+  change: "value" | "options";
+  config:SubscribeValue | SubscribeOptions
+}
+
+export interface SubscribeOptions {
+  option_api?: OptionApiType & { query_key?: string };
+  options?: LabelValue[];
+}
+
+export interface SubscribeValue {
+  fields?: string[];
+  macro?:"sum" | "concat" | "multiply" | "divide" | "subtract";
 }
 
 export type EventSubscriptionItemType = {
