@@ -3,5 +3,8 @@ import { signal } from "@preact/signals";
 export const submitSignal = signal(null);
 
 
-export let instanceCount = 0;
-
+export const pubSignal = signal({
+    value:null,
+    name:null,
+    event:null,
+})
