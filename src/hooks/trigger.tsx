@@ -1,6 +1,7 @@
 import { useEffect } from "preact/hooks";
 import { isFalsy } from "../utils";
 import { FORM_CHANGE_EVENT } from "../const";
+import { pubSignal } from "../signals";
 
 
 export default function useTrigger(config, name, value) {
@@ -18,11 +19,14 @@ export default function useTrigger(config, name, value) {
 
 
         config.forEach((event) => {
-            document.dispatchEvent(
-                new CustomEvent(FORM_CHANGE_EVENT, {
-                    detail: { value: value, name: name, event },
-                })
-            );
+
+            pubSignal.value = { value: value, name: name, event };
+
+            // document.dispatchEvent(
+            //     new CustomEvent(FORM_CHANGE_EVENT, {
+            //         detail: { value: value, name: name, event },
+            //     })
+            // );
         })
 
 

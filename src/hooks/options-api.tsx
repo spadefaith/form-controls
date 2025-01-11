@@ -1,7 +1,7 @@
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { createOptions, fetchOptions, isFalsy, mergeTo, replace } from "../utils";
-import { caches } from "..";
+import caches from "../utils/caches";
 
 
 
@@ -27,7 +27,7 @@ export default function useRemoteOptions(config, selectedValue, name, isChanged)
 
         if (cache) {
             cache.forEach(c => {
-                !isFalsy(caches.get(c)) && (data[c] = caches.get(c).get("value"));
+                !isFalsy(caches().get(c)) && (data[c] = caches().get(c).get("value"));
             })
         };
 
